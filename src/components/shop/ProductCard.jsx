@@ -4,6 +4,8 @@ import { Heart, ShoppingCart, Eye } from "lucide-react";
 import { useRouter } from "@/context/RouterContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { handleImageError } from "@/lib/imageFallback";
+import { motion } from "framer-motion";
 
 export default function ProductCard({ product }) {
   const { navigate } = useRouter();
@@ -50,16 +52,26 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white hover:border-erode-black transition-colors">
+    <motion.div
+      className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+      whileHover={{
+        y: -6,
+        boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
+      }}
+      transition={{ duration: 0.3 }}
+    >
       {/* Image */}
       <div
-        className="relative cursor-pointer"
+        className="relative cursor-pointer overflow-hidden"
         onClick={handleViewDetails}
       >
-        <img
+        <motion.img
           src={product.image}
           alt={product.name}
           className="w-full aspect-[4/3] object-cover rounded-t-lg"
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.3 }}
+          onError={handleImageError}
         />
 
         {/* Featured badge */}
@@ -127,6 +139,6 @@ export default function ProductCard({ product }) {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

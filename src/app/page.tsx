@@ -1,39 +1,31 @@
 "use client";
 
-import { lazy, Suspense, useContext } from "react";
+import { useContext } from "react";
 import { RouterProvider, RouterContext } from "@/context/RouterContext";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 
-const Navbar = lazy(() => import("@/components/common/Navbar"));
-const Footer = lazy(() => import("@/components/common/Footer"));
-const CartDrawer = lazy(() => import("@/components/common/CartDrawer"));
-const Home = lazy(() => import("@/pages/Home"));
-const About = lazy(() => import("@/pages/About"));
-const Shop = lazy(() => import("@/pages/Shop"));
-const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
-const Training = lazy(() => import("@/pages/Training"));
-const Contact = lazy(() => import("@/pages/Contact"));
-const Login = lazy(() => import("@/pages/Login"));
-const Signup = lazy(() => import("@/pages/Signup"));
-const Dashboard = lazy(() => import("@/pages/Dashboard"));
-const Checkout = lazy(() => import("@/pages/Checkout"));
-const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
-const AdminProducts = lazy(() => import("@/pages/admin/AdminProducts"));
-const AdminOrders = lazy(() => import("@/pages/admin/AdminOrders"));
-const AdminReviews = lazy(() => import("@/pages/admin/AdminReviews"));
-const AdminEvents = lazy(() => import("@/pages/admin/AdminEvents"));
-const AdminTraining = lazy(() => import("@/pages/admin/AdminTraining"));
-const AdminSettings = lazy(() => import("@/pages/admin/AdminSettings"));
-
-function PageLoader() {
-  return (
-    <div className="flex items-center justify-center py-20">
-      <div className="w-8 h-8 border-4 border-gray-200 border-t-[#B8D63C] rounded-full animate-spin" />
-    </div>
-  );
-}
+import Navbar from "@/components/common/Navbar";
+import Footer from "@/components/common/Footer";
+import CartDrawer from "@/components/common/CartDrawer";
+import Home from "@/pages/Home";
+import About from "@/pages/About";
+import Shop from "@/pages/Shop";
+import ProductDetail from "@/pages/ProductDetail";
+import Training from "@/pages/Training";
+import Contact from "@/pages/Contact";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import Dashboard from "@/pages/Dashboard";
+import Checkout from "@/pages/Checkout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminProducts from "@/pages/admin/AdminProducts";
+import AdminOrders from "@/pages/admin/AdminOrders";
+import AdminReviews from "@/pages/admin/AdminReviews";
+import AdminEvents from "@/pages/admin/AdminEvents";
+import AdminTraining from "@/pages/admin/AdminTraining";
+import AdminSettings from "@/pages/admin/AdminSettings";
 
 function AppRouter() {
   const { path } = useContext(RouterContext);
@@ -62,16 +54,12 @@ function AppRouter() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Suspense fallback={<PageLoader />}>
-        <Navbar />
-      </Suspense>
+      <Navbar />
       <main className="flex-1">
-        <Suspense fallback={<PageLoader />}>
-          {renderPage()}
-        </Suspense>
+        {renderPage()}
       </main>
-      {!isAdmin && <Suspense fallback={null}><Footer /></Suspense>}
-      <Suspense fallback={null}><CartDrawer /></Suspense>
+      {!isAdmin && <Footer />}
+      <CartDrawer />
     </div>
   );
 }

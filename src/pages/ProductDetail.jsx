@@ -14,8 +14,8 @@ export default function ProductDetail() {
   const { path, params, navigate } = useRouter();
 
   const product = useMemo(() => {
-    // Extract slug from path like /product/gare-falcon
-    const slug = path.replace("/product/", "");
+    // Extract slug from path like /products/gare-falcon
+    const slug = path.replace("/products/", "");
     return products.find((p) => p.slug === slug);
   }, [path]);
 

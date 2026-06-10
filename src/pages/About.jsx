@@ -1,7 +1,7 @@
 "use client";
 
 import { Shield, Award, Tag, Heart, CheckCircle, Phone, Mail, MapPin } from "lucide-react";
-import { whyChooseUs, teamMembers, achievements, storeInfo } from "@/data/mockData";
+import { whyChooseUs, teamMembers, achievements, storeInfo, aboutInfo } from "@/data/mockData";
 
 const iconMap = {
   Shield: Shield,
@@ -21,7 +21,7 @@ export default function About() {
             We&apos;re The Best Rifles Seller
           </h1>
           <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Erode Rifles is the premier destination for air rifles, air pistols, and shooting sports accessories in Tamil Nadu. With years of expertise and a passion for the sport, we deliver excellence in every aspect.
+            {aboutInfo.quality} {aboutInfo.team}
           </p>
         </div>
       </section>
@@ -35,7 +35,7 @@ export default function About() {
             </h2>
             <div className="w-16 h-1 bg-erode-green mx-auto mb-8"></div>
             <p className="text-lg text-gray-600 leading-relaxed">
-              At Erode Rifles, we are committed to promoting shooting sports in Tamil Nadu. Our mission is to provide the highest quality air rifles, air pistols, and accessories while offering professional training that develops world-class shooters.
+              {aboutInfo.mission}
             </p>
           </div>
         </div>

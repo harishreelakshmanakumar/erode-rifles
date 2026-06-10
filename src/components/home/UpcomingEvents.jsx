@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { events } from "@/data/mockData";
 import { Calendar, Clock, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
 
 const TABS = ["All", "Competition", "Training", "Event", "Workshop"];
 
@@ -18,14 +19,20 @@ export default function UpcomingEvents() {
     <section className="bg-white py-20 px-6 md:px-12 lg:px-24">
       <div className="max-w-7xl mx-auto">
         {/* Section Heading */}
-        <div className="text-center mb-8">
+        <motion.div
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.5 }}
+        >
           <span className="text-erode-green font-semibold text-sm uppercase tracking-wider">
             What&apos;s Happening
           </span>
           <h2 className="font-heading text-4xl text-erode-black mt-2">
             Upcoming Events &amp; Competitions
           </h2>
-        </div>
+        </motion.div>
 
         {/* Filter Tabs */}
         <div className="flex flex-wrap justify-center gap-2 mb-10">
@@ -46,15 +53,23 @@ export default function UpcomingEvents() {
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredEvents.map((event) => {
+          {filteredEvents.map((event, index) => {
             const dateParts = event.date.split(" ");
             const dayNum = dateParts[1]?.replace(",", "") || "";
             const month = dateParts[0] || "";
 
             return (
-              <div
+              <motion.div
                 key={event.id}
                 className="border border-gray-200 rounded-lg p-6 flex gap-5"
+                initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{
+                  y: -4,
+                  boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
+                }}
               >
                 {/* Date Badge */}
                 <div className="flex-shrink-0 bg-erode-black rounded-lg w-16 h-16 flex flex-col items-center justify-center">
@@ -86,7 +101,7 @@ export default function UpcomingEvents() {
                     Register
                   </button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

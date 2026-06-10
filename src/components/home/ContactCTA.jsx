@@ -1,13 +1,20 @@
 "use client";
 
 import { useRouter } from "@/context/RouterContext";
+import { motion } from "framer-motion";
 
 export default function ContactCTA() {
   const { navigate } = useRouter();
 
   return (
     <section className="bg-white py-20 px-6 md:px-12 lg:px-24">
-      <div className="max-w-7xl mx-auto text-center space-y-6">
+      <motion.div
+        className="max-w-7xl mx-auto text-center space-y-6"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.5 }}
+      >
         <h2 className="font-heading text-4xl md:text-5xl text-erode-black">
           Ready to Start Your Shooting Journey?
         </h2>
@@ -29,7 +36,7 @@ export default function ContactCTA() {
             Contact Us
           </button>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
