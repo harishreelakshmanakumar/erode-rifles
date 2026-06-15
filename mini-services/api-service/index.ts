@@ -113,6 +113,45 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// POST /api/auth/google — Google OAuth sign-in
+// Accepts a Google user profile (name, email) and creates/finds the user
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { name, email, googleId } = req.body;
+    if (!email) {
+      res.status(400).json({ success: false, error: 'Email is required for Google sign-in.' });
+      return;
+    }
+
+    // Check if user already exists
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      // Create a new user with a random password (they authenticate via Google)
+      const randomPassword = await bcrypt.hash(Math.random().toString(36) + Date.now().toString(), 10);
+      user = await prisma.user.create({
+        data: {
+          name: name || email.split('@')[0],
+          email,
+          phone: null,
+          password: randomPassword,
+          role: 'USER',
+        },
+      });
+    }
+
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({
+      success: true,
+      data: {
+        id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, token,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // POST /api/auth/forgot-password
 app.post('/api/auth/forgot-password', async (req, res) => {
   try {

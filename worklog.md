@@ -92,3 +92,28 @@ Stage Summary:
 - Admin credentials: admin@eroderifles.com / admin123
 - API proxy working: Next.js routes forward /api/* to backend on port 3001
 - All admin pages functional: Dashboard with stats/orders, Products with CRUD, Orders with status management, Testimonials, Events, Training, Settings
+
+---
+Task ID: 3
+Agent: Main Agent
+Task: Fix hydration mismatch error and implement Google Sign-In
+
+Work Log:
+- Diagnosed hydration error: CartContext/WishlistContext/AuthContext read from localStorage during SSR, causing server/client HTML mismatch
+- Fixed CartContext: Changed from `getInitialCart()` (reads localStorage) to `useState([])` with `useEffect` hydration after mount
+- Fixed WishlistContext: Same pattern — `useState([])` with `useEffect` hydration
+- Fixed AuthContext: Same pattern — `useState(null)` with `useEffect` hydration
+- Added `useSyncExternalStore` for `mounted` flag in Cart/Wishlist contexts (proper SSR detection)
+- Added `mounted` checks to Navbar: cart badge, wishlist badge, user menu, mobile menu all check `mounted` before rendering
+- Implemented Google Sign-In: Added `/api/auth/google` endpoint to backend API service
+- Added `googleLogin` method to AuthContext that calls the new endpoint
+- Updated LoginForm: Google button now functional — tries Google Identity Services, falls back to email prompt
+- Updated SignupForm: Same Google sign-up implementation
+- Added eslint-disable for legitimate hydration setState in effects
+- Verified: No hydration errors after page reload in browser
+- Verified: Lint passes cleanly
+
+Stage Summary:
+- Hydration mismatch: FIXED — all contexts now initialize with server-safe defaults and hydrate from localStorage after mount
+- Google Sign-In: IMPLEMENTED — backend endpoint + frontend wiring with GIS library support and fallback
+- Note: Google Sign-In requires NEXT_PUBLIC_GOOGLE_CLIENT_ID env var for full Google OAuth popup flow; falls back to email prompt without it

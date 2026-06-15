@@ -1,24 +1,43 @@
 "use client";
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useSyncExternalStore } from "react";
 
 const CartContext = createContext();
 
-function getInitialCart() {
-  if (typeof window === "undefined") return [];
-  const saved = localStorage.getItem("erodeCart");
-  if (saved) {
-    try { return JSON.parse(saved); } catch { return []; }
-  }
-  return [];
-}
+// Subscribe to no-op (localStorage doesn't emit events within same tab)
+function subscribe() { return () => {}; }
+function getSnapshot() { return true; } // client: always mounted
+function getServerSnapshot() { return false; } // server: never mounted
 
 export function CartProvider({ children }) {
-  const [items, setItems] = useState(getInitialCart);
+  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [items, setItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
+  // Hydrate from localStorage after mount
   useEffect(() => {
-    localStorage.setItem("erodeCart", JSON.stringify(items));
-  }, [items]);
+    if (hydrated) return;
+    try {
+      const saved = localStorage.getItem("erodeCart");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setItems(parsed);
+        }
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    setHydrated(true);
+  }, []);
+
+  // Save to localStorage whenever items change
+  useEffect(() => {
+    if (hydrated) {
+      localStorage.setItem("erodeCart", JSON.stringify(items));
+    }
+  }, [items, hydrated]);
 
   const addToCart = useCallback((product, qty = 1) => {
     setItems(prev => {
@@ -58,8 +77,8 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider value={{
-      items, total, count, isCartOpen, setIsCartOpen,
-      addToCart, removeFromCart, updateQuantity, clearCart
+      items, total, count, isCartOpen, setIsCartOpen, mounted,
+      addToCart, removeFromCart, updateQuantity, clearCart,
     }}>
       {children}
     </CartContext.Provider>

@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 const AuthContext = createContext();
 
@@ -8,25 +8,29 @@ function apiUrl(path) {
   return `/api/${path}`;
 }
 
-function getInitialUser() {
-  if (typeof window === "undefined") return null;
-  const saved = localStorage.getItem("erodeUser");
-  if (saved) {
-    try { return JSON.parse(saved); } catch { return null; }
-  }
-  return null;
-}
-
-function getInitialToken() {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("erodeToken") || null;
-}
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(getInitialUser);
-  const [token, setToken] = useState(getInitialToken);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Hydrate from localStorage after mount (client-only)
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem("erodeUser");
+      const savedToken = localStorage.getItem("erodeToken");
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
+      if (savedToken) {
+        setToken(savedToken);
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    setMounted(true);
+  }, []);
 
   const login = useCallback(async (email, password) => {
     setLoading(true);
@@ -83,6 +87,37 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const googleLogin = useCallback(async (googleUser) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(apiUrl("auth/google"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: googleUser.name,
+          email: googleUser.email,
+          googleId: googleUser.sub,
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || "Google sign-in failed");
+      }
+      const { token: jwt, ...userData } = data.data;
+      setUser(userData);
+      setToken(jwt);
+      localStorage.setItem("erodeUser", JSON.stringify(userData));
+      localStorage.setItem("erodeToken", jwt);
+      setLoading(false);
+      return userData;
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+      throw err;
+    }
+  }, []);
+
   const logout = useCallback(() => {
     setUser(null);
     setToken(null);
@@ -109,8 +144,8 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      user, token, loading, error,
-      login, signup, logout, isAdmin, authFetch
+      user, token, loading, error, mounted,
+      login, signup, googleLogin, logout, isAdmin, authFetch
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,23 +1,41 @@
 "use client";
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useSyncExternalStore } from "react";
 
 const WishlistContext = createContext();
 
-function getInitialWishlist() {
-  if (typeof window === "undefined") return [];
-  const saved = localStorage.getItem("erodeWishlist");
-  if (saved) {
-    try { return JSON.parse(saved); } catch { return []; }
-  }
-  return [];
-}
+function subscribe() { return () => {}; }
+function getSnapshot() { return true; }
+function getServerSnapshot() { return false; }
 
 export function WishlistProvider({ children }) {
-  const [items, setItems] = useState(getInitialWishlist);
+  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [items, setItems] = useState([]);
+  const [hydrated, setHydrated] = useState(false);
 
+  // Hydrate from localStorage after mount
   useEffect(() => {
-    localStorage.setItem("erodeWishlist", JSON.stringify(items));
-  }, [items]);
+    if (hydrated) return;
+    try {
+      const saved = localStorage.getItem("erodeWishlist");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setItems(parsed);
+        }
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    setHydrated(true);
+  }, []);
+
+  // Save to localStorage whenever items change
+  useEffect(() => {
+    if (hydrated) {
+      localStorage.setItem("erodeWishlist", JSON.stringify(items));
+    }
+  }, [items, hydrated]);
 
   const addToWishlist = useCallback((product) => {
     setItems(prev => {
@@ -35,7 +53,7 @@ export function WishlistProvider({ children }) {
   }, [items]);
 
   return (
-    <WishlistContext.Provider value={{ items, addToWishlist, removeFromWishlist, isInWishlist }}>
+    <WishlistContext.Provider value={{ items, addToWishlist, removeFromWishlist, isInWishlist, mounted }}>
       {children}
     </WishlistContext.Provider>
   );

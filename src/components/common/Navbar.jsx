@@ -24,9 +24,12 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const { navigate, path } = useRouter();
-  const { count, setIsCartOpen } = useCart();
-  const { user, logout, isAdmin } = useAuth();
-  const { items: wishlistItems } = useWishlist();
+  const { count, setIsCartOpen, mounted: cartMounted } = useCart();
+  const { user, logout, isAdmin, mounted: authMounted } = useAuth();
+  const { items: wishlistItems, mounted: wishlistMounted } = useWishlist();
+
+  // Consolidated mounted state — only render client-only UI after all contexts hydrate
+  const mounted = cartMounted && authMounted && wishlistMounted;
 
   // Track scroll for navbar shadow
   useEffect(() => {
@@ -176,7 +179,7 @@ export default function Navbar() {
                 aria-label="Wishlist"
               >
                 <Heart size={18} />
-                {wishlistItems.length > 0 && (
+                {mounted && wishlistItems.length > 0 && (
                   <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {wishlistItems.length}
                   </span>
@@ -190,7 +193,7 @@ export default function Navbar() {
                 aria-label="Cart"
               >
                 <ShoppingCart size={18} />
-                {count > 0 && (
+                {mounted && count > 0 && (
                   <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {count}
                   </span>
@@ -198,7 +201,7 @@ export default function Navbar() {
               </button>
 
               {/* Auth */}
-              {user ? (
+              {mounted && user ? (
                 <div className="relative">
                   <button
                     onClick={(e) => { e.stopPropagation(); setUserMenuOpen(!userMenuOpen); }}
@@ -261,7 +264,7 @@ export default function Navbar() {
                 aria-label="Cart"
               >
                 <ShoppingCart size={20} />
-                {count > 0 && (
+                {mounted && count > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-erode-green text-erode-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {count}
                   </span>
@@ -408,7 +411,7 @@ export default function Navbar() {
                 >
                   <Heart size={18} />
                   Wishlist
-                  {wishlistItems.length > 0 && (
+                  {mounted && wishlistItems.length > 0 && (
                     <span className="bg-erode-green text-erode-black text-xs font-bold px-2 py-0.5 rounded-full">
                       {wishlistItems.length}
                     </span>
@@ -416,7 +419,7 @@ export default function Navbar() {
                 </button>
 
                 {/* Auth */}
-                {user ? (
+                {mounted && user ? (
                   <>
                     <button
                       onClick={() => handleNavClick(isAdmin ? "/admin" : "/dashboard")}
