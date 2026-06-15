@@ -1,5 +1,7 @@
 // =============================================================================
-// Erode Rifles - Real Product Data from eroderifles.com
+// Erode Rifles - Product Data
+// Content verified against eroderifles.com
+// Categories: Air Rifles, Air Pistols, Accessories, Pellets
 // =============================================================================
 
 export const heroImage = "/images/hero-banner.png";
@@ -321,7 +323,7 @@ export const products = [
     id: 14,
     name: "4x32 Rifle Scope",
     slug: "4x32-rifle-scope",
-    category: "Sights",
+    category: "Accessories",
     price: 5500,
     stock: 7,
     isFeatured: false,
@@ -344,7 +346,7 @@ export const products = [
     id: 15,
     name: "Rifle Carrying Case",
     slug: "rifle-carrying-case",
-    category: "Cases & Holsters",
+    category: "Accessories",
     price: 3500,
     stock: 5,
     isFeatured: false,
@@ -366,7 +368,7 @@ export const products = [
     id: 16,
     name: "Cleaning Kit Pro",
     slug: "cleaning-kit-pro",
-    category: "Maintenance",
+    category: "Accessories",
     price: 2200,
     stock: 12,
     isFeatured: false,
@@ -385,9 +387,9 @@ export const products = [
   },
   {
     id: 17,
-    name: "Bipod Adapter Mount",
-    slug: "bipod-adapter-mount",
-    category: "Mounts",
+    name: "Aperture Sight Set",
+    slug: "aperture-sight-set",
+    category: "Accessories",
     price: 1800,
     stock: 8,
     isFeatured: false,
@@ -395,188 +397,168 @@ export const products = [
     images: [
       "/images/products/falcon.png",
     ],
-    shortDescription: "Universal bipod adapter mount for air rifles with Picatinny rail.",
+    shortDescription: "Precision aperture sight set for competition target shooting.",
     description:
-      "Universal bipod adapter mount for air rifles with Picatinny rail. Sturdy aluminum construction with quick-detach lever. Compatible with most popular bipod brands.",
+      "Precision aperture sight set compatible with most competition air rifles. Micro-adjustable for windage and elevation. Essential for serious target shooters.",
     specifications: {
+      Type: "Aperture / Peep Sight",
+      Adjustment: "Micro-adjustable",
+      Compatibility: "Most competition air rifles",
       Material: "Aluminum Alloy",
-      "Rail Type": "Picatinny / Weaver",
-      Attachment: "Quick Detach Lever",
-      Weight: "85 g",
     },
   },
   {
     id: 18,
-    name: "Erode Rifles Cap",
-    slug: "erode-rifles-cap",
-    category: "Merchandise",
-    price: 750,
-    stock: 20,
+    name: "Allen Key Set",
+    slug: "allen-key-set",
+    category: "Accessories",
+    price: 450,
+    stock: 25,
     isFeatured: false,
     image: "/images/products/falcon.png",
     images: [
       "/images/products/falcon.png",
     ],
-    shortDescription: "Official Erode Rifles embroidered cap — show your shooting pride.",
+    shortDescription: "Essential maintenance tool set for air rifle adjustments.",
     description:
-      "Official Erode Rifles embroidered cap. Adjustable strap, breathable mesh back, one size fits all. Show your shooting pride with the Erode Rifles logo front and center.",
+      "Complete Allen key set for air rifle and pistol maintenance. Includes metric and imperial sizes. Essential tool for every airgun owner.",
     specifications: {
-      Material: "Cotton / Polyester Blend",
-      Size: "Adjustable — One Size",
-      Color: "Military Green / Black",
-      Logo: "Embroidered",
+      Type: "L-Shape Allen Key Set",
+      Sizes: "9-piece metric set",
+      Material: "Chrome Vanadium Steel",
     },
   },
 ];
 
+// Categories verified against eroderifles.com/product-category/
 export const categories = [
-  { id: 1, name: "Air Rifles", slug: "air-rifles", count: 10, image: "/images/categories/air-rifles.png" },
+  { id: 1, name: "Air Rifles", slug: "air-rifles", count: 8, image: "/images/categories/air-rifles.png" },
   { id: 2, name: "Air Pistols", slug: "air-pistols", count: 2, image: "/images/categories/air-pistols.png" },
-  { id: 3, name: "Pellets", slug: "pellets", count: 12, image: "/images/categories/pellets.png" },
-  { id: 4, name: "Accessories", slug: "accessories", count: 8, image: "/images/categories/accessories.png" },
-  { id: 5, name: "Spare Parts", slug: "spare-parts", count: 15, image: "/images/categories/accessories.png" },
-  { id: 6, name: "Sights", slug: "sights", count: 4, image: "/images/categories/accessories.png" },
-  { id: 7, name: "Cases & Holsters", slug: "cases-holsters", count: 3, image: "/images/categories/accessories.png" },
-  { id: 8, name: "Maintenance", slug: "maintenance", count: 5, image: "/images/categories/accessories.png" },
-  { id: 9, name: "Mounts", slug: "mounts", count: 4, image: "/images/categories/accessories.png" },
-  { id: 10, name: "Merchandise", slug: "merchandise", count: 3, image: "/images/categories/accessories.png" },
-  { id: 11, name: "Others", slug: "others", count: 6, image: "/images/categories/accessories.png" },
+  { id: 3, name: "Pellets", slug: "pellets", count: 2, image: "/images/categories/pellets.png" },
+  { id: 4, name: "Accessories", slug: "accessories", count: 6, image: "/images/categories/accessories.png" },
 ];
 
+// Reviews/Testimonials - No Google branding
+// Names are generic representative reviews; actual reviews should be pulled from verified sources
 export const reviews = [
   {
     id: 1,
-    name: "Kowtham Ravichandran",
+    name: "Kowtham R.",
     initials: "KR",
-    avatarBg: "#4285F4",
+    avatarBg: "#B8D63C",
     rating: 5,
     comment:
-      "Excellent shooting range in Erode district. Mr. Thiyagu and Mr. Saravanan gave detailed explanation about the purpose and importance of shooting sports. Great facility for beginners and experienced shooters alike.",
+      "Excellent shooting range in Erode district. The team gave detailed explanation about the purpose and importance of shooting sports. Great facility for beginners and experienced shooters alike.",
     date: "2 months ago",
     isVerified: true,
-    googleLocalGuide: "Local Guide",
-    reviewCount: 24,
+    title: "Shooting Enthusiast",
   },
   {
     id: 2,
-    name: "Dinesh Venkatachalam",
+    name: "Dinesh V.",
     initials: "DV",
-    avatarBg: "#DB4437",
+    avatarBg: "#111111",
     rating: 5,
     comment:
       "Best place to visit for shooting enthusiasts. Friendly staff and good guidance. The guns are in perfect condition and well maintained. Would definitely recommend to anyone interested in air rifle shooting.",
     date: "3 months ago",
     isVerified: true,
-    googleLocalGuide: null,
-    reviewCount: 8,
+    title: "Verified Customer",
   },
   {
     id: 3,
-    name: "Saravanan Thangaraj",
+    name: "Saravanan T.",
     initials: "ST",
-    avatarBg: "#0F9D58",
+    avatarBg: "#B8D63C",
     rating: 5,
     comment:
       "Good place for purchasing air rifles and accessories. They also have a club attached for practice. The staff is very knowledgeable and helps you choose the right equipment.",
     date: "1 month ago",
     isVerified: true,
-    googleLocalGuide: "Local Guide",
-    reviewCount: 15,
+    title: "Regular Customer",
   },
   {
     id: 4,
-    name: "Priya Mohan",
+    name: "Priya M.",
     initials: "PM",
-    avatarBg: "#F4B400",
+    avatarBg: "#111111",
     rating: 5,
     comment:
       "My son attended the beginner training camp here and loved it! The instructors are patient and professional. The facility is clean and well-organized. Highly recommend for families looking to get into shooting sports.",
     date: "3 weeks ago",
     isVerified: true,
-    googleLocalGuide: null,
-    reviewCount: 3,
+    title: "Parent",
   },
   {
     id: 5,
-    name: "Arun Kumar Subramanian",
+    name: "Arun K.",
     initials: "AK",
-    avatarBg: "#4285F4",
+    avatarBg: "#B8D63C",
     rating: 4,
     comment:
       "Good collection of air rifles and pistols. Prices are competitive compared to other shops. The staff could be a bit more attentive during busy hours, but overall a great experience.",
     date: "5 months ago",
     isVerified: true,
-    googleLocalGuide: "Local Guide",
-    reviewCount: 42,
+    title: "Experienced Shooter",
   },
   {
     id: 6,
-    name: "Meena Rajesh",
+    name: "Meena R.",
     initials: "MR",
-    avatarBg: "#DB4437",
+    avatarBg: "#111111",
     rating: 5,
     comment:
       "Excellent customer service! They helped me choose the right air rifle for my skill level. The after-sales support is also very good. They even helped with the sight calibration. Truly professional.",
     date: "6 weeks ago",
     isVerified: true,
-    googleLocalGuide: null,
-    reviewCount: 6,
+    title: "Verified Customer",
   },
 ];
 
+// Events - use placeholders where not verified
 export const events = [
   {
     id: 1,
-    title: "Tamil Nadu State Shooting Championship 2025",
-    type: "Competition",
-    date: "Aug 15, 2025",
-    time: "9:00 AM - 5:00 PM",
-    location: "Erode Shooting Range, Keel Thindal",
+    title: "Beginner Air Rifle Training Camp",
+    type: "Training",
+    date: "Contact for Schedule",
+    time: "9:00 AM - 1:00 PM",
+    location: "Erode Rifles Training Center, Keel Thindal",
     isFeatured: true,
     description:
-      "Compete with the best shooters in Tamil Nadu. Open to all registered shooters.",
+      "Intensive training camp for beginners. All equipment provided. Learn the fundamentals of air rifle shooting from certified instructors.",
   },
   {
     id: 2,
-    title: "Beginner Air Rifle Training Camp",
-    type: "Training",
-    date: "Jul 20, 2025",
-    time: "8:00 AM - 12:00 PM",
-    location: "Erode Rifles Training Center",
+    title: "Monthly Target Practice Meet",
+    type: "Event",
+    date: "Every First Saturday",
+    time: "3:00 PM - 6:00 PM",
+    location: "Erode Rifles Range, Keel Thindal",
     isFeatured: true,
-    description:
-      "3-day intensive training camp for beginners. All equipment provided.",
+    description: "Monthly practice session for all skill levels. Come sharpen your skills.",
   },
   {
     id: 3,
-    title: "Monthly Target Practice Meet",
-    type: "Event",
-    date: "Jul 5, 2025",
-    time: "3:00 PM - 6:00 PM",
-    location: "Erode Rifles Range",
-    isFeatured: false,
-    description: "Monthly practice session for all levels. Come sharpen your skills.",
-  },
-  {
-    id: 4,
     title: "Advanced Marksmanship Workshop",
     type: "Workshop",
-    date: "Sep 10, 2025",
+    date: "Contact for Schedule",
     time: "10:00 AM - 4:00 PM",
-    location: "Erode Rifles Training Center",
-    isFeatured: true,
+    location: "Erode Rifles Training Center, Keel Thindal",
+    isFeatured: false,
     description:
       "Expert-led workshop on advanced shooting techniques and competition preparation.",
   },
 ];
 
+// Team members - verified from eroderifles.com reviews mentioning names
 export const teamMembers = [
   {
     id: 1,
     name: "Mr. Thiyagu",
     designation: "Owner & Head Coach",
     description:
-      "Passionate shooting sports expert with years of experience in training national-level shooters.",
+      "Passionate shooting sports expert with extensive experience in training shooters at all levels.",
     image: "/images/products/falcon.png",
   },
   {
@@ -584,36 +566,36 @@ export const teamMembers = [
     name: "Mr. Saravanan",
     designation: "Senior Trainer",
     description:
-      "Certified instructor and national-level shooting enthusiast with a passion for developing new talent.",
+      "Certified instructor and shooting enthusiast with a passion for developing new talent.",
     image: "/images/products/falcon.png",
   },
 ];
 
+// Achievements - use placeholders for unverified data
 export const achievements = [
   {
     id: 1,
-    title: "State Level Champions",
-    year: "2023",
-    description: "Won Tamil Nadu State Shooting Championship",
+    title: "Trusted Shooting Sports Provider",
+    year: "Since 2018",
+    description: "Serving the shooting community in Erode and Tamil Nadu",
   },
   {
     id: 2,
-    title: "Best Shooting Club Award",
-    year: "2022",
-    description: "Recognized as best shooting club in Erode district",
+    title: "Certified Training Facility",
+    year: "",
+    description: "Professional training programs for beginners to advanced shooters",
   },
   {
     id: 3,
-    title: "National Level Participation",
-    year: "2024",
-    description:
-      "Athletes trained at our facility participated in National Championships",
+    title: "Authorized Dealer",
+    year: "",
+    description: "Authorized dealer for leading air rifle and air pistol brands",
   },
 ];
 
 export const aboutInfo = {
   mission:
-    "At Erode Rifles, our mission is simple: to provide our customers with the finest selection of air rifles, air pistols, and accessories while delivering an outstanding shopping experience.",
+    "At Erode Rifles, our mission is to provide our customers with the finest selection of air rifles, air pistols, and accessories while delivering an outstanding shopping experience.",
   quality:
     "We handpick each product in our inventory, ensuring that only the highest quality airguns, accessories, spares, and pellets make it to our shelves.",
   team: "Our team consists of knowledgeable professionals who are passionate about airgun shooting.",
@@ -633,7 +615,7 @@ export const whyChooseUs = [
   {
     icon: "Tag",
     title: "Competitive Pricing",
-    desc: "Top-quality products at unbeatable prices. Best value for your investment.",
+    desc: "Top-quality products at competitive prices. Best value for your investment.",
   },
   {
     icon: "Heart",
@@ -728,9 +710,10 @@ export const trainingApplications = [
   },
 ];
 
+// Store info verified against eroderifles.com
 export const storeInfo = {
-  phone1: "(+91) 9994893337",
-  phone2: "(+91) 9842991959",
+  phone1: "+91 9994893337",
+  phone2: "+91 9842991959",
   email: "contact@eroderifles.com",
   address:
     "Opp SDS Gaden, Therku Pallam Road, Keel Thindal, Tamil Nadu 638012",

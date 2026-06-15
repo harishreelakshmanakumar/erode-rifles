@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "@/context/RouterContext";
 import { products } from "@/data/mockData";
 import ProductCard from "@/components/shop/ProductCard";
@@ -15,14 +15,24 @@ export default function Shop() {
   const { params } = useRouter();
 
   const [searchText, setSearchTextRaw] = useState("");
-  const [selectedCategories, setSelectedCategoriesRaw] = useState(
-    () => (params?.category ? [params.category] : [])
-  );
+  const [selectedCategories, setSelectedCategoriesRaw] = useState([]);
   const [priceMin, setPriceMinRaw] = useState(0);
   const [priceMax, setPriceMaxRaw] = useState(70000);
   const [inStockOnly, setInStockOnlyRaw] = useState(false);
   const [sortOrder, setSortOrderRaw] = useState("relevance");
   const [currentPage, setCurrentPage] = useState(1);
+  const [initialized, setInitialized] = useState(false);
+
+  // Initialize category from router params (only once)
+  if (!initialized && params) {
+    if (params.category) {
+      setSelectedCategoriesRaw([params.category]);
+    }
+    if (params.search) {
+      setSearchTextRaw(params.search);
+    }
+    setInitialized(true);
+  }
 
   // Wrapper setters that also reset page
   const setSearchText = useCallback((val) => {
@@ -70,7 +80,7 @@ export default function Shop() {
       );
     }
 
-    // Filter by categories
+    // Filter by categories (using category names)
     if (selectedCategories.length > 0) {
       result = result.filter((p) => selectedCategories.includes(p.category));
     }
@@ -154,16 +164,32 @@ export default function Shop() {
   return (
     <div className="min-h-screen bg-white">
       {/* Page Header */}
-      <div className="border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="font-heading text-4xl text-erode-black">Shop</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Browse our collection of premium air rifles, pistols, and accessories
+      <div className="border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+          <h1 className="font-heading text-3xl sm:text-4xl text-erode-black">Shop</h1>
+          <p className="text-sm text-erode-black/50 mt-1">
+            Browse our collection of premium air rifles, pistols, pellets, and accessories
           </p>
+          {selectedCategories.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <span className="text-xs text-erode-black/50">Filtered by:</span>
+              {selectedCategories.map((cat) => (
+                <span key={cat} className="inline-flex items-center gap-1 bg-erode-green/10 text-erode-black text-xs font-medium px-3 py-1 rounded-full">
+                  {cat}
+                  <button
+                    onClick={() => setSelectedCategories(selectedCategories.filter(c => c !== cat))}
+                    className="hover:text-red-500 ml-1 cursor-pointer"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <div className="flex gap-8">
           {/* Desktop Sidebar */}
           <Sidebar
@@ -208,7 +234,7 @@ export default function Shop() {
             </div>
 
             {/* Desktop SortBar */}
-            <div className="hidden lg:block border-b border-gray-200 mb-6">
+            <div className="hidden lg:block border-b border-gray-100 mb-6">
               <SortBar
                 productCount={filteredProducts.length}
                 sortOrder={sortOrder}
@@ -223,11 +249,11 @@ export default function Shop() {
               priceMin > 0 ||
               priceMax < 70000) && (
               <div className="flex flex-wrap items-center gap-2 mb-4">
-                <span className="text-sm text-gray-500">Active filters:</span>
+                <span className="text-sm text-erode-black/50">Active filters:</span>
                 {selectedCategories.map((cat) => (
                   <span
                     key={cat}
-                    className="inline-flex items-center gap-1 bg-gray-100 text-erode-black text-xs px-2 py-1 rounded"
+                    className="inline-flex items-center gap-1 bg-gray-100 text-erode-black text-xs px-2 py-1 rounded-full"
                   >
                     {cat}
                     <button
@@ -236,41 +262,47 @@ export default function Shop() {
                           prev.filter((c) => c !== cat)
                         )
                       }
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       ×
                     </button>
                   </span>
                 ))}
                 {searchText && (
-                  <span className="inline-flex items-center gap-1 bg-gray-100 text-erode-black text-xs px-2 py-1 rounded">
+                  <span className="inline-flex items-center gap-1 bg-gray-100 text-erode-black text-xs px-2 py-1 rounded-full">
                     &quot;{searchText}&quot;
                     <button
                       onClick={() => setSearchText("")}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       ×
                     </button>
                   </span>
                 )}
                 {inStockOnly && (
-                  <span className="inline-flex items-center gap-1 bg-gray-100 text-erode-black text-xs px-2 py-1 rounded">
+                  <span className="inline-flex items-center gap-1 bg-gray-100 text-erode-black text-xs px-2 py-1 rounded-full">
                     In Stock
                     <button
                       onClick={() => setInStockOnly(false)}
-                      className="hover:text-red-500"
+                      className="hover:text-red-500 cursor-pointer"
                     >
                       ×
                     </button>
                   </span>
                 )}
+                <button
+                  onClick={clearFilters}
+                  className="text-xs text-erode-green font-semibold hover:underline cursor-pointer"
+                >
+                  Clear all
+                </button>
               </div>
             )}
 
             {/* Product Grid */}
             {paginatedProducts.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {paginatedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -284,7 +316,7 @@ export default function Shop() {
                         setCurrentPage((prev) => Math.max(1, prev - 1))
                       }
                       disabled={currentPage === 1}
-                      className="flex items-center gap-1 border border-gray-200 rounded px-3 py-2 text-sm text-erode-black hover:border-erode-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="flex items-center gap-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-erode-black hover:border-erode-green transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <ChevronLeft className="w-4 h-4" />
                       Prev
@@ -294,10 +326,10 @@ export default function Shop() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`w-10 h-10 rounded text-sm font-medium transition-colors ${
+                        className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
                           currentPage === page
                             ? "bg-erode-green text-erode-black"
-                            : "border border-gray-200 text-erode-black hover:border-erode-black"
+                            : "border border-gray-200 text-erode-black hover:border-erode-green"
                         }`}
                       >
                         {page}
@@ -309,7 +341,7 @@ export default function Shop() {
                         setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                       }
                       disabled={currentPage === totalPages}
-                      className="flex items-center gap-1 border border-gray-200 rounded px-3 py-2 text-sm text-erode-black hover:border-erode-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="flex items-center gap-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-erode-black hover:border-erode-green transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Next
                       <ChevronRight className="w-4 h-4" />
@@ -318,7 +350,7 @@ export default function Shop() {
                 )}
 
                 {/* Showing count */}
-                <p className="text-center text-sm text-gray-500 mt-4">
+                <p className="text-center text-sm text-erode-black/40 mt-4">
                   Showing{" "}
                   {(currentPage - 1) * PRODUCTS_PER_PAGE + 1}–
                   {Math.min(
@@ -333,12 +365,12 @@ export default function Shop() {
                 <p className="text-lg text-erode-black font-semibold mb-2">
                   No products found
                 </p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-erode-black/50 mb-4">
                   Try adjusting your filters or search terms
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="border border-erode-black text-erode-black font-medium text-sm py-2 px-4 rounded hover:bg-erode-black hover:text-white transition-colors"
+                  className="bg-erode-green text-erode-black font-semibold text-sm py-2 px-6 rounded-lg hover:bg-erode-green/90 transition-colors cursor-pointer"
                 >
                   Clear All Filters
                 </button>

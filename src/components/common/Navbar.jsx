@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Heart, ShoppingCart, User, Menu, X, LayoutDashboard, Users, Package, Settings, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Heart, ShoppingCart, User, Menu, X, LogOut, ChevronDown } from "lucide-react";
 import { useRouter } from "@/context/RouterContext";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -15,30 +16,42 @@ const navLinks = [
   { label: "Contact", path: "/contact" },
 ];
 
-const adminLinks = [
-  { label: "Dashboard", path: "/admin", icon: LayoutDashboard },
-  { label: "Products", path: "/admin/products", icon: Package },
-  { label: "Orders", path: "/admin/orders", icon: ShoppingCart },
-  { label: "Users", path: "/admin/users", icon: Users },
-  { label: "Settings", path: "/admin/settings", icon: Settings },
-];
-
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const { navigate, path } = useRouter();
   const { count, setIsCartOpen } = useCart();
   const { user, logout, isAdmin } = useAuth();
   const { items: wishlistItems } = useWishlist();
 
-  const isAdminPage = path.startsWith("/admin");
+  // Track scroll for navbar shadow
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  const handleNavClick = (path) => {
-    navigate(path);
+  // Close mobile menu on route change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional UI reset on navigation
+    setMobileOpen(false);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional UI reset on navigation
+    setSearchOpen(false);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional UI reset on navigation
+    setUserMenuOpen(false);
+  }, [path]);
+
+  const handleNavClick = (navPath) => {
+    navigate(navPath);
     setMobileOpen(false);
     setSearchOpen(false);
+    setUserMenuOpen(false);
   };
 
   const handleSearch = (e) => {
@@ -58,44 +71,58 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white border-b border-erode-black">
+      <header
+        className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${
+          scrolled ? "shadow-md" : "border-b border-gray-100"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* Logo */}
+            {/* Logo - More Prominent */}
             <button
               onClick={() => handleNavClick("/")}
-              className="flex-shrink-0 cursor-pointer"
+              className="flex-shrink-0 cursor-pointer group"
             >
-              <span className="font-heading text-2xl sm:text-3xl font-bold text-erode-black tracking-wider">
+              <span className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-erode-black tracking-widest group-hover:text-erode-green transition-colors duration-300">
                 ERODE RIFLES
               </span>
             </button>
 
             {/* Desktop Nav Links */}
-            <nav className="hidden lg:flex items-center gap-8">
+            <nav className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) => (
                 <button
                   key={link.path}
                   onClick={() => handleNavClick(link.path)}
-                  className={`
-                    text-sm font-medium tracking-wide uppercase transition-colors duration-200 cursor-pointer
-                    ${isActive(link.path)
+                  className={`relative px-4 py-2 text-sm font-medium tracking-wide uppercase transition-colors duration-200 cursor-pointer rounded-lg ${
+                    isActive(link.path)
                       ? "text-erode-green"
-                      : "text-erode-black hover:text-erode-green"
-                    }
-                  `}
+                      : "text-erode-black/70 hover:text-erode-black hover:bg-gray-50"
+                  }`}
                 >
                   {link.label}
+                  {/* Active indicator */}
+                  {isActive(link.path) && (
+                    <motion.div
+                      layoutId="activeNav"
+                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-erode-green rounded-full"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                 </button>
               ))}
             </nav>
 
             {/* Desktop Right Icons */}
-            <div className="hidden lg:flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-1">
               {/* Search */}
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
-                className="p-2 text-erode-black hover:text-erode-green transition-colors cursor-pointer"
+                className={`p-2.5 rounded-lg transition-all duration-200 cursor-pointer ${
+                  searchOpen
+                    ? "bg-erode-green/10 text-erode-green"
+                    : "text-erode-black/70 hover:text-erode-black hover:bg-gray-50"
+                }`}
                 aria-label="Search"
               >
                 <Search size={20} />
@@ -104,12 +131,12 @@ export default function Navbar() {
               {/* Wishlist */}
               <button
                 onClick={() => handleNavClick("/wishlist")}
-                className="relative p-2 text-erode-black hover:text-erode-green transition-colors cursor-pointer"
+                className="relative p-2.5 rounded-lg text-erode-black/70 hover:text-erode-black hover:bg-gray-50 transition-all duration-200 cursor-pointer"
                 aria-label="Wishlist"
               >
                 <Heart size={20} />
                 {wishlistItems.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-erode-green text-erode-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {wishlistItems.length}
                   </span>
                 )}
@@ -118,12 +145,12 @@ export default function Navbar() {
               {/* Cart */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 text-erode-black hover:text-erode-green transition-colors cursor-pointer"
+                className="relative p-2.5 rounded-lg text-erode-black/70 hover:text-erode-black hover:bg-gray-50 transition-all duration-200 cursor-pointer"
                 aria-label="Cart"
               >
                 <ShoppingCart size={20} />
                 {count > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-erode-green text-erode-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
                     {count}
                   </span>
                 )}
@@ -131,17 +158,53 @@ export default function Navbar() {
 
               {/* Auth */}
               {user ? (
-                <button
-                  onClick={() => handleNavClick(isAdmin ? "/admin" : "/profile")}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-erode-black hover:text-erode-green transition-colors cursor-pointer"
-                >
-                  <User size={18} />
-                  <span className="hidden xl:inline">{user.name?.split(" ")[0]}</span>
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-erode-black/70 hover:text-erode-black hover:bg-gray-50 rounded-lg transition-all duration-200 cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-erode-green/20 flex items-center justify-center">
+                      <span className="text-erode-green text-xs font-bold">
+                        {user.name?.charAt(0)?.toUpperCase()}
+                      </span>
+                    </div>
+                    <span className="hidden xl:inline">{user.name?.split(" ")[0]}</span>
+                    <ChevronDown size={14} className={`transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {/* User dropdown */}
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-2 z-50"
+                      >
+                        <button
+                          onClick={() => handleNavClick(isAdmin ? "/admin" : "/dashboard")}
+                          className="w-full text-left px-4 py-2.5 text-sm text-erode-black/80 hover:bg-gray-50 hover:text-erode-black transition-colors cursor-pointer flex items-center gap-2"
+                        >
+                          <User size={16} />
+                          {isAdmin ? "Admin Panel" : "My Dashboard"}
+                        </button>
+                        <div className="border-t border-gray-100 my-1" />
+                        <button
+                          onClick={() => { logout(); setUserMenuOpen(false); }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer flex items-center gap-2"
+                        >
+                          <LogOut size={16} />
+                          Sign Out
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ) : (
                 <button
                   onClick={() => handleNavClick("/login")}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-erode-green text-erode-black rounded hover:bg-[#a5c235] transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-erode-green text-erode-black rounded-lg hover:bg-erode-green/90 transition-colors cursor-pointer"
                 >
                   <User size={16} />
                   Login
@@ -150,7 +213,7 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Right Icons */}
-            <div className="flex lg:hidden items-center gap-3">
+            <div className="flex lg:hidden items-center gap-1">
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2 text-erode-black cursor-pointer"
@@ -174,145 +237,182 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Search Bar (expandable) */}
-          {searchOpen && (
-            <div className="hidden lg:block pb-4">
-              <form onSubmit={handleSearch} className="flex items-center gap-2">
-                <div className="flex-1 relative">
-                  <Search
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search for air rifles, pistols, pellets..."
-                    className="w-full pl-10 pr-4 py-2.5 border border-erode-black rounded text-sm focus:outline-none focus:border-erode-green"
-                    autoFocus
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 bg-erode-green text-erode-black font-semibold rounded text-sm hover:bg-[#a5c235] transition-colors cursor-pointer"
-                >
-                  Search
-                </button>
-              </form>
-            </div>
-          )}
+          <AnimatePresence>
+            {searchOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="hidden lg:block overflow-hidden"
+              >
+                <form onSubmit={handleSearch} className="flex items-center gap-2 pb-4">
+                  <div className="flex-1 relative">
+                    <Search
+                      size={16}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search for air rifles, pistols, pellets, accessories..."
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-erode-green focus:ring-2 focus:ring-erode-green/20 transition-all"
+                      autoFocus
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="px-6 py-3 bg-erode-green text-erode-black font-semibold rounded-xl text-sm hover:bg-erode-green/90 transition-colors cursor-pointer"
+                  >
+                    Search
+                  </button>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 
       {/* Mobile Full-Screen Drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          {/* Overlay */}
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setMobileOpen(false)}
-          />
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[60] lg:hidden"
+          >
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setMobileOpen(false)}
+            />
 
-          {/* Drawer Content */}
-          <div className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white flex flex-col">
-            {/* Drawer Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-erode-black">
-              <span className="font-heading text-xl font-bold text-erode-black tracking-wider">
-                ERODE RIFLES
-              </span>
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="p-2 text-erode-black cursor-pointer"
-                aria-label="Close menu"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Mobile Search */}
-            <div className="px-6 py-4 border-b border-gray-100">
-              <form onSubmit={handleSearch} className="flex items-center gap-2">
-                <div className="flex-1 relative">
-                  <Search
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products..."
-                    className="w-full pl-10 pr-4 py-2.5 border border-erode-black rounded text-sm focus:outline-none focus:border-erode-green"
-                  />
-                </div>
-              </form>
-            </div>
-
-            {/* Navigation Links */}
-            <nav className="flex-1 overflow-y-auto px-6 py-4">
-              {navLinks.map((link) => (
+            {/* Drawer Content */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }}
+              className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white flex flex-col"
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                <span className="font-heading text-2xl font-bold text-erode-black tracking-widest">
+                  ERODE RIFLES
+                </span>
                 <button
-                  key={link.path}
-                  onClick={() => handleNavClick(link.path)}
-                  className={`
-                    block w-full text-left py-3 text-base font-medium tracking-wide uppercase transition-colors duration-200 cursor-pointer border-b border-gray-100
-                    ${isActive(link.path)
-                      ? "text-erode-green"
-                      : "text-erode-black hover:text-erode-green"
-                    }
-                  `}
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 text-erode-black hover:text-erode-green transition-colors cursor-pointer"
+                  aria-label="Close menu"
                 >
-                  {link.label}
+                  <X size={24} />
                 </button>
-              ))}
+              </div>
 
-              {/* Wishlist Link */}
-              <button
-                onClick={() => handleNavClick("/wishlist")}
-                className="flex items-center gap-3 w-full text-left py-3 text-base font-medium tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-100"
-              >
-                <Heart size={18} />
-                Wishlist
-                {wishlistItems.length > 0 && (
-                  <span className="bg-erode-green text-erode-black text-xs font-bold px-2 py-0.5 rounded-full">
-                    {wishlistItems.length}
-                  </span>
+              {/* Mobile Search */}
+              <div className="px-6 py-4 border-b border-gray-100">
+                <form onSubmit={handleSearch} className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                    <Search
+                      size={16}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search products..."
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-erode-green focus:ring-2 focus:ring-erode-green/20 transition-all"
+                    />
+                  </div>
+                </form>
+              </div>
+
+              {/* Navigation Links */}
+              <nav className="flex-1 overflow-y-auto px-6 py-4">
+                {navLinks.map((link, idx) => (
+                  <motion.button
+                    key={link.path}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    onClick={() => handleNavClick(link.path)}
+                    className={`flex items-center justify-between w-full text-left py-3.5 text-base font-medium tracking-wide uppercase transition-colors duration-200 cursor-pointer border-b border-gray-50 ${
+                      isActive(link.path)
+                        ? "text-erode-green"
+                        : "text-erode-black hover:text-erode-green"
+                    }`}
+                  >
+                    {link.label}
+                    {isActive(link.path) && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-erode-green" />
+                    )}
+                  </motion.button>
+                ))}
+
+                {/* Wishlist Link */}
+                <button
+                  onClick={() => handleNavClick("/wishlist")}
+                  className="flex items-center gap-3 w-full text-left py-3.5 text-base font-medium tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-50"
+                >
+                  <Heart size={18} />
+                  Wishlist
+                  {wishlistItems.length > 0 && (
+                    <span className="bg-erode-green text-erode-black text-xs font-bold px-2 py-0.5 rounded-full">
+                      {wishlistItems.length}
+                    </span>
+                  )}
+                </button>
+
+                {/* Auth */}
+                {user ? (
+                  <>
+                    <button
+                      onClick={() => handleNavClick(isAdmin ? "/admin" : "/dashboard")}
+                      className="flex items-center gap-3 w-full text-left py-3.5 text-base font-medium tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-50"
+                    >
+                      <User size={18} />
+                      {isAdmin ? "Admin Panel" : "My Dashboard"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setMobileOpen(false);
+                      }}
+                      className="flex items-center gap-3 w-full text-left py-3.5 text-base font-medium tracking-wide uppercase text-red-500 hover:text-red-600 transition-colors cursor-pointer border-b border-gray-50"
+                    >
+                      <LogOut size={18} />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <div className="mt-4 space-y-3">
+                    <button
+                      onClick={() => handleNavClick("/login")}
+                      className="w-full flex items-center justify-center gap-2 py-3 text-base font-semibold bg-erode-green text-erode-black rounded-xl hover:bg-erode-green/90 transition-colors cursor-pointer"
+                    >
+                      <User size={18} />
+                      Login
+                    </button>
+                    <button
+                      onClick={() => handleNavClick("/signup")}
+                      className="w-full flex items-center justify-center gap-2 py-3 text-base font-medium border-2 border-erode-black text-erode-black rounded-xl hover:bg-erode-black hover:text-white transition-colors cursor-pointer"
+                    >
+                      Create Account
+                    </button>
+                  </div>
                 )}
-              </button>
-
-              {/* Auth */}
-              {user ? (
-                <>
-                  <button
-                    onClick={() => handleNavClick(isAdmin ? "/admin" : "/profile")}
-                    className="flex items-center gap-3 w-full text-left py-3 text-base font-medium tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-100"
-                  >
-                    <User size={18} />
-                    {user.name}
-                  </button>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setMobileOpen(false);
-                    }}
-                    className="flex items-center gap-3 w-full text-left py-3 text-base font-medium tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-100"
-                  >
-                    <LogOut size={18} />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => handleNavClick("/login")}
-                  className="flex items-center gap-3 w-full text-left py-3 text-base font-medium tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-100"
-                >
-                  <User size={18} />
-                  Login / Sign Up
-                </button>
-              )}
-            </nav>
-          </div>
-        </div>
-      )}
+              </nav>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
