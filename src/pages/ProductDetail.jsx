@@ -11,10 +11,9 @@ import ReviewsList from "@/components/product/ReviewsList";
 import { ArrowLeft } from "lucide-react";
 
 export default function ProductDetail() {
-  const { path, params, navigate } = useRouter();
+  const { path, navigate } = useRouter();
 
   const product = useMemo(() => {
-    // Extract slug from path like /products/gare-falcon
     const slug = path.replace("/products/", "");
     return products.find((p) => p.slug === slug);
   }, [path]);
@@ -27,7 +26,7 @@ export default function ProductDetail() {
         </p>
         <button
           onClick={() => navigate("/shop")}
-          className="flex items-center gap-2 border border-erode-black text-erode-black font-medium text-sm py-2 px-4 rounded hover:bg-erode-black hover:text-white transition-colors"
+          className="flex items-center gap-2 border border-erode-black text-erode-black font-medium text-sm py-2 px-4 rounded hover:bg-erode-black hover:text-white transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Shop
@@ -43,7 +42,7 @@ export default function ProductDetail() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <button
             onClick={() => navigate("/shop")}
-            className="flex items-center gap-2 text-sm text-erode-black hover:text-erode-green transition-colors"
+            className="flex items-center gap-2 text-sm text-erode-black hover:text-erode-green transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Shop
@@ -53,14 +52,14 @@ export default function ProductDetail() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Product Top Section */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left: Image Gallery (60%) */}
-          <div className="w-full lg:w-[60%]">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+          {/* Left: Image — constrained to match product card width for visual consistency */}
+          <div className="w-full mx-auto lg:mx-0 flex-shrink-0" style={{ maxWidth: "380px" }}>
             <ImageGallery images={product.images || [product.image]} />
           </div>
 
-          {/* Right: Product Info (40%) */}
-          <div className="w-full lg:w-[40%]">
+          {/* Right: Product Info — takes remaining space */}
+          <div className="w-full lg:flex-1 min-w-0">
             <ProductInfo product={product} />
           </div>
         </div>
