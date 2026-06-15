@@ -300,8 +300,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-erode-black text-sm mb-1">Business Hours</h3>
-                    <p className="text-sm text-erode-black/60">Mon - Sat: 9:00 AM - 7:00 PM</p>
-                    <p className="text-sm text-erode-black/60">Sunday: Closed</p>
+                    <p className="text-sm text-erode-black/60">{storeInfo.hours}</p>
+                    <p className="text-sm text-erode-green font-medium">{storeInfo.sundayHours}</p>
                   </div>
                 </div>
               </div>

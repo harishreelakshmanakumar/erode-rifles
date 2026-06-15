@@ -1,0 +1,702 @@
+     1→import express from 'express';
+     2→import cors from 'cors';
+     3→import bcrypt from 'bcryptjs';
+     4→import jwt from 'jsonwebtoken';
+     5→import { PrismaClient } from '@prisma/client';
+     6→
+     7→const app = express();
+     8→const prisma = new PrismaClient();
+     9→const PORT = 3001;
+    10→const JWT_SECRET = 'erode-rifles-jwt-secret-2025';
+    11→
+    12→// Middleware
+    13→app.use(cors({
+    14→  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    15→  credentials: true,
+    16→}));
+    17→app.use(express.json());
+    18→
+    19→// =============================================================================
+    20→// AUTH MIDDLEWARE
+    21→// =============================================================================
+    22→
+    23→interface JwtPayload {
+    24→  userId: number;
+    25→  role: string;
+    26→}
+    27→
+    28→function authMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+    29→  const authHeader = req.headers.authorization;
+    30→  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    31→    res.status(401).json({ success: false, error: 'Access denied. No token provided.' });
+    32→    return;
+    33→  }
+    34→  try {
+    35→    const token = authHeader.split(' ')[1];
+    36→    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    37→    (req as any).user = decoded;
+    38→    next();
+    39→  } catch {
+    40→    res.status(401).json({ success: false, error: 'Invalid token.' });
+    41→  }
+    42→}
+    43→
+    44→function adminMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+    45→  const user = (req as any).user;
+    46→  if (!user || user.role !== 'ADMIN') {
+    47→    res.status(403).json({ success: false, error: 'Access denied. Admin only.' });
+    48→    return;
+    49→  }
+    50→  next();
+    51→}
+    52→
+    53→// =============================================================================
+    54→// AUTH ROUTES
+    55→// =============================================================================
+    56→
+    57→// POST /api/auth/register
+    58→app.post('/api/auth/register', async (req, res) => {
+    59→  try {
+    60→    const { name, email, phone, password } = req.body;
+    61→    if (!name || !email || !password) {
+    62→      res.status(400).json({ success: false, error: 'Name, email, and password are required.' });
+    63→      return;
+    64→    }
+    65→    const existing = await prisma.user.findUnique({ where: { email } });
+    66→    if (existing) {
+    67→      res.status(409).json({ success: false, error: 'Email already registered.' });
+    68→      return;
+    69→    }
+    70→    const hashedPassword = await bcrypt.hash(password, 10);
+    71→    const user = await prisma.user.create({
+    72→      data: { name, email, phone: phone || null, password: hashedPassword, role: 'USER' },
+    73→    });
+    74→    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    75→    res.status(201).json({
+    76→      success: true,
+    77→      data: {
+    78→        id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, token,
+    79→      },
+    80→    });
+    81→  } catch (error: any) {
+    82→    res.status(500).json({ success: false, error: error.message });
+    83→  }
+    84→});
+    85→
+    86→// POST /api/auth/login
+    87→app.post('/api/auth/login', async (req, res) => {
+    88→  try {
+    89→    const { email, password } = req.body;
+    90→    if (!email || !password) {
+    91→      res.status(400).json({ success: false, error: 'Email and password are required.' });
+    92→      return;
+    93→    }
+    94→    const user = await prisma.user.findUnique({ where: { email } });
+    95→    if (!user) {
+    96→      res.status(401).json({ success: false, error: 'Invalid email or password.' });
+    97→      return;
+    98→    }
+    99→    const valid = await bcrypt.compare(password, user.password);
+   100→    if (!valid) {
+   101→      res.status(401).json({ success: false, error: 'Invalid email or password.' });
+   102→      return;
+   103→    }
+   104→    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+   105→    res.json({
+   106→      success: true,
+   107→      data: {
+   108→        id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, token,
+   109→      },
+   110→    });
+   111→  } catch (error: any) {
+   112→    res.status(500).json({ success: false, error: error.message });
+   113→  }
+   114→});
+   115→
+   116→// POST /api/auth/forgot-password
+   117→app.post('/api/auth/forgot-password', async (req, res) => {
+   118→  try {
+   119→    const { email } = req.body;
+   120→    if (!email) {
+   121→      res.status(400).json({ success: false, error: 'Email is required.' });
+   122→      return;
+   123→    }
+   124→    const user = await prisma.user.findUnique({ where: { email } });
+   125→    if (!user) {
+   126→      // Still return success to prevent email enumeration
+   127→      res.json({ success: true, data: { message: 'If an account with that email exists, a reset link has been sent.' } });
+   128→      return;
+   129→    }
+   130→    // In a real app, send an email with reset token
+   131→    res.json({ success: true, data: { message: 'If an account with that email exists, a reset link has been sent.' } });
+   132→  } catch (error: any) {
+   133→    res.status(500).json({ success: false, error: error.message });
+   134→  }
+   135→});
+   136→
+   137→// =============================================================================
+   138→// PRODUCT ROUTES
+   139→// =============================================================================
+   140→
+   141→// GET /api/products
+   142→app.get('/api/products', async (req, res) => {
+   143→  try {
+   144→    const { category, search, featured } = req.query;
+   145→    const where: any = {};
+   146→    if (category) where.category = category as string;
+   147→    if (featured === 'true') where.isFeatured = true;
+   148→    if (search) {
+   149→      where.OR = [
+   150→        { name: { contains: search as string } },
+   151→        { shortDescription: { contains: search as string } },
+   152→        { category: { contains: search as string } },
+   153→      ];
+   154→    }
+   155→    const products = await prisma.product.findMany({ where, orderBy: { createdAt: 'desc' } });
+   156→    res.json({ success: true, data: products });
+   157→  } catch (error: any) {
+   158→    res.status(500).json({ success: false, error: error.message });
+   159→  }
+   160→});
+   161→
+   162→// GET /api/products/:slug
+   163→app.get('/api/products/:slug', async (req, res) => {
+   164→  try {
+   165→    const product = await prisma.product.findUnique({ where: { slug: req.params.slug } });
+   166→    if (!product) {
+   167→      res.status(404).json({ success: false, error: 'Product not found.' });
+   168→      return;
+   169→    }
+   170→    res.json({ success: true, data: product });
+   171→  } catch (error: any) {
+   172→    res.status(500).json({ success: false, error: error.message });
+   173→  }
+   174→});
+   175→
+   176→// POST /api/products (ADMIN)
+   177→app.post('/api/products', authMiddleware, adminMiddleware, async (req, res) => {
+   178→  try {
+   179→    const { name, slug, category, price, originalPrice, stock, isFeatured, image, images, shortDescription, description, specifications } = req.body;
+   180→    if (!name || !slug || !category || price === undefined) {
+   181→      res.status(400).json({ success: false, error: 'Name, slug, category, and price are required.' });
+   182→      return;
+   183→    }
+   184→    const product = await prisma.product.create({
+   185→      data: {
+   186→        name, slug, category, price,
+   187→        originalPrice: originalPrice || null,
+   188→        stock: stock || 0,
+   189→        isFeatured: isFeatured || false,
+   190→        image: image || '',
+   191→        images: images ? JSON.stringify(images) : '[]',
+   192→        shortDescription: shortDescription || null,
+   193→        description: description || null,
+   194→        specifications: specifications ? JSON.stringify(specifications) : '{}',
+   195→      },
+   196→    });
+   197→    res.status(201).json({ success: true, data: product });
+   198→  } catch (error: any) {
+   199→    if (error.code === 'P2002') {
+   200→      res.status(409).json({ success: false, error: 'Product with this slug already exists.' });
+   201→      return;
+   202→    }
+   203→    res.status(500).json({ success: false, error: error.message });
+   204→  }
+   205→});
+   206→
+   207→// PUT /api/products/:id (ADMIN)
+   208→app.put('/api/products/:id', authMiddleware, adminMiddleware, async (req, res) => {
+   209→  try {
+   210→    const id = parseInt(req.params.id);
+   211→    const existing = await prisma.product.findUnique({ where: { id } });
+   212→    if (!existing) {
+   213→      res.status(404).json({ success: false, error: 'Product not found.' });
+   214→      return;
+   215→    }
+   216→    const { name, slug, category, price, originalPrice, stock, isFeatured, image, images, shortDescription, description, specifications } = req.body;
+   217→    const product = await prisma.product.update({
+   218→      where: { id },
+   219→      data: {
+   220→        ...(name !== undefined && { name }),
+   221→        ...(slug !== undefined && { slug }),
+   222→        ...(category !== undefined && { category }),
+   223→        ...(price !== undefined && { price }),
+   224→        ...(originalPrice !== undefined && { originalPrice }),
+   225→        ...(stock !== undefined && { stock }),
+   226→        ...(isFeatured !== undefined && { isFeatured }),
+   227→        ...(image !== undefined && { image }),
+   228→        ...(images !== undefined && { images: JSON.stringify(images) }),
+   229→        ...(shortDescription !== undefined && { shortDescription }),
+   230→        ...(description !== undefined && { description }),
+   231→        ...(specifications !== undefined && { specifications: JSON.stringify(specifications) }),
+   232→      },
+   233→    });
+   234→    res.json({ success: true, data: product });
+   235→  } catch (error: any) {
+   236→    res.status(500).json({ success: false, error: error.message });
+   237→  }
+   238→});
+   239→
+   240→// DELETE /api/products/:id (ADMIN)
+   241→app.delete('/api/products/:id', authMiddleware, adminMiddleware, async (req, res) => {
+   242→  try {
+   243→    const id = parseInt(req.params.id);
+   244→    const existing = await prisma.product.findUnique({ where: { id } });
+   245→    if (!existing) {
+   246→      res.status(404).json({ success: false, error: 'Product not found.' });
+   247→      return;
+   248→    }
+   249→    await prisma.product.delete({ where: { id } });
+   250→    res.json({ success: true, data: { message: 'Product deleted.' } });
+   251→  } catch (error: any) {
+   252→    res.status(500).json({ success: false, error: error.message });
+   253→  }
+   254→});
+   255→
+   256→// =============================================================================
+   257→// CATEGORY ROUTES
+   258→// =============================================================================
+   259→
+   260→// GET /api/categories
+   261→app.get('/api/categories', async (req, res) => {
+   262→  try {
+   263→    const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } });
+   264→    res.json({ success: true, data: categories });
+   265→  } catch (error: any) {
+   266→    res.status(500).json({ success: false, error: error.message });
+   267→  }
+   268→});
+   269→
+   270→// POST /api/categories (ADMIN)
+   271→app.post('/api/categories', authMiddleware, adminMiddleware, async (req, res) => {
+   272→  try {
+   273→    const { name, slug, count, image } = req.body;
+   274→    if (!name || !slug) {
+   275→      res.status(400).json({ success: false, error: 'Name and slug are required.' });
+   276→      return;
+   277→    }
+   278→    const category = await prisma.category.create({
+   279→      data: { name, slug, count: count || 0, image: image || null },
+   280→    });
+   281→    res.status(201).json({ success: true, data: category });
+   282→  } catch (error: any) {
+   283→    if (error.code === 'P2002') {
+   284→      res.status(409).json({ success: false, error: 'Category with this slug already exists.' });
+   285→      return;
+   286→    }
+   287→    res.status(500).json({ success: false, error: error.message });
+   288→  }
+   289→});
+   290→
+   291→// PUT /api/categories/:id (ADMIN)
+   292→app.put('/api/categories/:id', authMiddleware, adminMiddleware, async (req, res) => {
+   293→  try {
+   294→    const id = parseInt(req.params.id);
+   295→    const existing = await prisma.category.findUnique({ where: { id } });
+   296→    if (!existing) {
+   297→      res.status(404).json({ success: false, error: 'Category not found.' });
+   298→      return;
+   299→    }
+   300→    const { name, slug, count, image } = req.body;
+   301→    const category = await prisma.category.update({
+   302→      where: { id },
+   303→      data: {
+   304→        ...(name !== undefined && { name }),
+   305→        ...(slug !== undefined && { slug }),
+   306→        ...(count !== undefined && { count }),
+   307→        ...(image !== undefined && { image }),
+   308→      },
+   309→    });
+   310→    res.json({ success: true, data: category });
+   311→  } catch (error: any) {
+   312→    res.status(500).json({ success: false, error: error.message });
+   313→  }
+   314→});
+   315→
+   316→// DELETE /api/categories/:id (ADMIN)
+   317→app.delete('/api/categories/:id', authMiddleware, adminMiddleware, async (req, res) => {
+   318→  try {
+   319→    const id = parseInt(req.params.id);
+   320→    const existing = await prisma.category.findUnique({ where: { id } });
+   321→    if (!existing) {
+   322→      res.status(404).json({ success: false, error: 'Category not found.' });
+   323→      return;
+   324→    }
+   325→    await prisma.category.delete({ where: { id } });
+   326→    res.json({ success: true, data: { message: 'Category deleted.' } });
+   327→  } catch (error: any) {
+   328→    res.status(500).json({ success: false, error: error.message });
+   329→  }
+   330→});
+   331→
+   332→// =============================================================================
+   333→// TESTIMONIAL ROUTES
+   334→// =============================================================================
+   335→
+   336→// GET /api/testimonials
+   337→app.get('/api/testimonials', async (req, res) => {
+   338→  try {
+   339→    const testimonials = await prisma.testimonial.findMany({ orderBy: { createdAt: 'desc' } });
+   340→    res.json({ success: true, data: testimonials });
+   341→  } catch (error: any) {
+   342→    res.status(500).json({ success: false, error: error.message });
+   343→  }
+   344→});
+   345→
+   346→// POST /api/testimonials (ADMIN)
+   347→app.post('/api/testimonials', authMiddleware, adminMiddleware, async (req, res) => {
+   348→  try {
+   349→    const { name, initials, avatarBg, rating, comment, date, isVerified, title } = req.body;
+   350→    if (!name || !comment) {
+   351→      res.status(400).json({ success: false, error: 'Name and comment are required.' });
+   352→      return;
+   353→    }
+   354→    const testimonial = await prisma.testimonial.create({
+   355→      data: {
+   356→        name,
+   357→        initials: initials || name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
+   358→        avatarBg: avatarBg || '#B8D63C',
+   359→        rating: rating || 5,
+   360→        comment,
+   361→        date: date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+   362→        isVerified: isVerified || false,
+   363→        title: title || null,
+   364→      },
+   365→    });
+   366→    res.status(201).json({ success: true, data: testimonial });
+   367→  } catch (error: any) {
+   368→    res.status(500).json({ success: false, error: error.message });
+   369→  }
+   370→});
+   371→
+   372→// PUT /api/testimonials/:id (ADMIN)
+   373→app.put('/api/testimonials/:id', authMiddleware, adminMiddleware, async (req, res) => {
+   374→  try {
+   375→    const id = parseInt(req.params.id);
+   376→    const existing = await prisma.testimonial.findUnique({ where: { id } });
+   377→    if (!existing) {
+   378→      res.status(404).json({ success: false, error: 'Testimonial not found.' });
+   379→      return;
+   380→    }
+   381→    const { name, initials, avatarBg, rating, comment, date, isVerified, title } = req.body;
+   382→    const testimonial = await prisma.testimonial.update({
+   383→      where: { id },
+   384→      data: {
+   385→        ...(name !== undefined && { name }),
+   386→        ...(initials !== undefined && { initials }),
+   387→        ...(avatarBg !== undefined && { avatarBg }),
+   388→        ...(rating !== undefined && { rating }),
+   389→        ...(comment !== undefined && { comment }),
+   390→        ...(date !== undefined && { date }),
+   391→        ...(isVerified !== undefined && { isVerified }),
+   392→        ...(title !== undefined && { title }),
+   393→      },
+   394→    });
+   395→    res.json({ success: true, data: testimonial });
+   396→  } catch (error: any) {
+   397→    res.status(500).json({ success: false, error: error.message });
+   398→  }
+   399→});
+   400→
+   401→// DELETE /api/testimonials/:id (ADMIN)
+   402→app.delete('/api/testimonials/:id', authMiddleware, adminMiddleware, async (req, res) => {
+   403→  try {
+   404→    const id = parseInt(req.params.id);
+   405→    const existing = await prisma.testimonial.findUnique({ where: { id } });
+   406→    if (!existing) {
+   407→      res.status(404).json({ success: false, error: 'Testimonial not found.' });
+   408→      return;
+   409→    }
+   410→    await prisma.testimonial.delete({ where: { id } });
+   411→    res.json({ success: true, data: { message: 'Testimonial deleted.' } });
+   412→  } catch (error: any) {
+   413→    res.status(500).json({ success: false, error: error.message });
+   414→  }
+   415→});
+   416→
+   417→// =============================================================================
+   418→// ORDER ROUTES
+   419→// =============================================================================
+   420→
+   421→// POST /api/orders (public)
+   422→app.post('/api/orders', async (req, res) => {
+   423→  try {
+   424→    const { customerName, email, phone, address, city, state, postalCode, items, total } = req.body;
+   425→    if (!customerName || !email || !address || !city || !items || total === undefined) {
+   426→      res.status(400).json({ success: false, error: 'Missing required fields.' });
+   427→      return;
+   428→    }
+   429→    // Generate order number
+   430→    const orderCount = await prisma.order.count();
+   431→    const orderNumber = `ER-${new Date().getFullYear()}-${String(orderCount + 1).padStart(3, '0')}`;
+   432→    const order = await prisma.order.create({
+   433→      data: {
+   434→        orderNumber,
+   435→        customerName,
+   436→        email,
+   437→        phone: phone || null,
+   438→        address,
+   439→        city,
+   440→        state: state || null,
+   441→        postalCode: postalCode || null,
+   442→        items: JSON.stringify(items),
+   443→        total,
+   444→        status: 'PENDING',
+   445→      },
+   446→    });
+   447→    res.status(201).json({ success: true, data: order });
+   448→  } catch (error: any) {
+   449→    res.status(500).json({ success: false, error: error.message });
+   450→  }
+   451→});
+   452→
+   453→// GET /api/orders (ADMIN)
+   454→app.get('/api/orders', authMiddleware, adminMiddleware, async (req, res) => {
+   455→  try {
+   456→    const orders = await prisma.order.findMany({ orderBy: { createdAt: 'desc' } });
+   457→    res.json({ success: true, data: orders });
+   458→  } catch (error: any) {
+   459→    res.status(500).json({ success: false, error: error.message });
+   460→  }
+   461→});
+   462→
+   463→// GET /api/orders/:id (ADMIN)
+   464→app.get('/api/orders/:id', authMiddleware, adminMiddleware, async (req, res) => {
+   465→  try {
+   466→    const id = parseInt(req.params.id);
+   467→    const order = await prisma.order.findUnique({ where: { id } });
+   468→    if (!order) {
+   469→      res.status(404).json({ success: false, error: 'Order not found.' });
+   470→      return;
+   471→    }
+   472→    res.json({ success: true, data: order });
+   473→  } catch (error: any) {
+   474→    res.status(500).json({ success: false, error: error.message });
+   475→  }
+   476→});
+   477→
+   478→// PUT /api/orders/:id/status (ADMIN)
+   479→app.put('/api/orders/:id/status', authMiddleware, adminMiddleware, async (req, res) => {
+   480→  try {
+   481→    const id = parseInt(req.params.id);
+   482→    const { status } = req.body;
+   483→    const validStatuses = ['PENDING', 'CONFIRMED', 'PACKED', 'DISPATCHED', 'DELIVERED', 'CANCELLED'];
+   484→    if (!status || !validStatuses.includes(status)) {
+   485→      res.status(400).json({ success: false, error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+   486→      return;
+   487→    }
+   488→    const existing = await prisma.order.findUnique({ where: { id } });
+   489→    if (!existing) {
+   490→      res.status(404).json({ success: false, error: 'Order not found.' });
+   491→      return;
+   492→    }
+   493→    const order = await prisma.order.update({ where: { id }, data: { status } });
+   494→    res.json({ success: true, data: order });
+   495→  } catch (error: any) {
+   496→    res.status(500).json({ success: false, error: error.message });
+   497→  }
+   498→});
+   499→
+   500→// =============================================================================
+   501→// ENQUIRY ROUTES
+   502→// =============================================================================
+   503→
+   504→// POST /api/enquiries (public)
+   505→app.post('/api/enquiries', async (req, res) => {
+   506→  try {
+   507→    const { name, email, phone, subject, message } = req.body;
+   508→    if (!name || !email || !subject || !message) {
+   509→      res.status(400).json({ success: false, error: 'Name, email, subject, and message are required.' });
+   510→      return;
+   511→    }
+   512→    const enquiry = await prisma.enquiry.create({
+   513→      data: { name, email, phone: phone || null, subject, message },
+   514→    });
+   515→    res.status(201).json({ success: true, data: enquiry });
+   516→  } catch (error: any) {
+   517→    res.status(500).json({ success: false, error: error.message });
+   518→  }
+   519→});
+   520→
+   521→// GET /api/enquiries (ADMIN)
+   522→app.get('/api/enquiries', authMiddleware, adminMiddleware, async (req, res) => {
+   523→  try {
+   524→    const enquiries = await prisma.enquiry.findMany({ orderBy: { createdAt: 'desc' } });
+   525→    res.json({ success: true, data: enquiries });
+   526→  } catch (error: any) {
+   527→    res.status(500).json({ success: false, error: error.message });
+   528→  }
+   529→});
+   530→
+   531→// PUT /api/enquiries/:id/read (ADMIN)
+   532→app.put('/api/enquiries/:id/read', authMiddleware, adminMiddleware, async (req, res) => {
+   533→  try {
+   534→    const id = parseInt(req.params.id);
+   535→    const existing = await prisma.enquiry.findUnique({ where: { id } });
+   536→    if (!existing) {
+   537→      res.status(404).json({ success: false, error: 'Enquiry not found.' });
+   538→      return;
+   539→    }
+   540→    const enquiry = await prisma.enquiry.update({ where: { id }, data: { isRead: true } });
+   541→    res.json({ success: true, data: enquiry });
+   542→  } catch (error: any) {
+   543→    res.status(500).json({ success: false, error: error.message });
+   544→  }
+   545→});
+   546→
+   547→// =============================================================================
+   548→// GALLERY ROUTES
+   549→// =============================================================================
+   550→
+   551→// GET /api/gallery
+   552→app.get('/api/gallery', async (req, res) => {
+   553→  try {
+   554→    const images = await prisma.galleryImage.findMany({ orderBy: { createdAt: 'desc' } });
+   555→    res.json({ success: true, data: images });
+   556→  } catch (error: any) {
+   557→    res.status(500).json({ success: false, error: error.message });
+   558→  }
+   559→});
+   560→
+   561→// POST /api/gallery (ADMIN)
+   562→app.post('/api/gallery', authMiddleware, adminMiddleware, async (req, res) => {
+   563→  try {
+   564→    const { title, imageUrl, category } = req.body;
+   565→    if (!title || !imageUrl) {
+   566→      res.status(400).json({ success: false, error: 'Title and imageUrl are required.' });
+   567→      return;
+   568→    }
+   569→    const image = await prisma.galleryImage.create({
+   570→      data: { title, imageUrl, category: category || null },
+   571→    });
+   572→    res.status(201).json({ success: true, data: image });
+   573→  } catch (error: any) {
+   574→    res.status(500).json({ success: false, error: error.message });
+   575→  }
+   576→});
+   577→
+   578→// DELETE /api/gallery/:id (ADMIN)
+   579→app.delete('/api/gallery/:id', authMiddleware, adminMiddleware, async (req, res) => {
+   580→  try {
+   581→    const id = parseInt(req.params.id);
+   582→    const existing = await prisma.galleryImage.findUnique({ where: { id } });
+   583→    if (!existing) {
+   584→      res.status(404).json({ success: false, error: 'Gallery image not found.' });
+   585→      return;
+   586→    }
+   587→    await prisma.galleryImage.delete({ where: { id } });
+   588→    res.json({ success: true, data: { message: 'Gallery image deleted.' } });
+   589→  } catch (error: any) {
+   590→    res.status(500).json({ success: false, error: error.message });
+   591→  }
+   592→});
+   593→
+   594→// =============================================================================
+   595→// SETTINGS ROUTES
+   596→// =============================================================================
+   597→
+   598→// GET /api/settings
+   599→app.get('/api/settings', async (req, res) => {
+   600→  try {
+   601→    const settings = await prisma.siteSetting.findMany();
+   602→    const settingsMap: Record<string, string> = {};
+   603→    settings.forEach(s => { settingsMap[s.key] = s.value; });
+   604→    res.json({ success: true, data: settingsMap });
+   605→  } catch (error: any) {
+   606→    res.status(500).json({ success: false, error: error.message });
+   607→  }
+   608→});
+   609→
+   610→// PUT /api/settings (ADMIN)
+   611→app.put('/api/settings', authMiddleware, adminMiddleware, async (req, res) => {
+   612→  try {
+   613→    const settings = req.body; // expects { key: value, key2: value2, ... }
+   614→    if (!settings || typeof settings !== 'object') {
+   615→      res.status(400).json({ success: false, error: 'Settings object is required.' });
+   616→      return;
+   617→    }
+   618→    const results = [];
+   619→    for (const [key, value] of Object.entries(settings)) {
+   620→      const result = await prisma.siteSetting.upsert({
+   621→        where: { key },
+   622→        update: { value: String(value) },
+   623→        create: { key, value: String(value) },
+   624→      });
+   625→      results.push(result);
+   626→    }
+   627→    res.json({ success: true, data: results });
+   628→  } catch (error: any) {
+   629→    res.status(500).json({ success: false, error: error.message });
+   630→  }
+   631→});
+   632→
+   633→// =============================================================================
+   634→// DASHBOARD ROUTES
+   635→// =============================================================================
+   636→
+   637→// GET /api/dashboard/stats (ADMIN)
+   638→app.get('/api/dashboard/stats', authMiddleware, adminMiddleware, async (req, res) => {
+   639→  try {
+   640→    const [totalProducts, totalOrders, totalUsers, totalEnquiries, pendingOrders, unreadEnquiries, totalRevenue] = await Promise.all([
+   641→      prisma.product.count(),
+   642→      prisma.order.count(),
+   643→      prisma.user.count({ where: { role: 'USER' } }),
+   644→      prisma.enquiry.count(),
+   645→      prisma.order.count({ where: { status: 'PENDING' } }),
+   646→      prisma.enquiry.count({ where: { isRead: false } }),
+   647→      prisma.order.aggregate({ _sum: { total: true } }),
+   648→    ]);
+   649→
+   650→    const recentOrders = await prisma.order.findMany({
+   651→      take: 5,
+   652→      orderBy: { createdAt: 'desc' },
+   653→    });
+   654→
+   655→    const recentEnquiries = await prisma.enquiry.findMany({
+   656→      take: 5,
+   657→      orderBy: { createdAt: 'desc' },
+   658→    });
+   659→
+   660→    const ordersByStatus = await prisma.order.groupBy({
+   661→      by: ['status'],
+   662→      _count: { status: true },
+   663→    });
+   664→
+   665→    res.json({
+   666→      success: true,
+   667→      data: {
+   668→        totalProducts,
+   669→        totalOrders,
+   670→        totalUsers,
+   671→        totalEnquiries,
+   672→        pendingOrders,
+   673→        unreadEnquiries,
+   674→        totalRevenue: totalRevenue._sum.total || 0,
+   675→        recentOrders,
+   676→        recentEnquiries,
+   677→        ordersByStatus: ordersByStatus.map(o => ({ status: o.status, count: o._count.status })),
+   678→      },
+   679→    });
+   680→  } catch (error: any) {
+   681→    res.status(500).json({ success: false, error: error.message });
+   682→  }
+   683→});
+   684→
+   685→// =============================================================================
+   686→// HEALTH CHECK
+   687→// =============================================================================
+   688→
+   689→app.get('/api/health', (_req, res) => {
+   690→  res.json({ success: true, data: { status: 'ok', timestamp: new Date().toISOString() } });
+   691→});
+   692→
+   693→// =============================================================================
+   694→// START SERVER
+   695→// =============================================================================
+   696→
+   697→app.listen(PORT, () => {
+   698→  console.log(`🚀 Erode Rifles API Server running on port ${PORT}`);
+   699→});
+   700→
+   701→export default app;
+   702→

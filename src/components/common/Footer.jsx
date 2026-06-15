@@ -1,14 +1,15 @@
 "use client";
 
-import { Instagram, Youtube, Facebook, MapPin, Phone, Mail, ArrowUp } from "lucide-react";
+import { Instagram, Youtube, Facebook, MapPin, Phone, Mail, ArrowUp, Clock } from "lucide-react";
 import { useRouter } from "@/context/RouterContext";
+import { storeInfo } from "@/data/mockData";
 
 const navLinks = [
   { label: "Home", path: "/" },
-  { label: "About", path: "/about" },
+  { label: "About Us", path: "/about" },
   { label: "Shop", path: "/shop" },
   { label: "Training", path: "/training" },
-  { label: "Contact", path: "/contact" },
+  { label: "Contact Us", path: "/contact" },
 ];
 
 const categoryLinks = [
@@ -36,13 +37,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Column 1: About */}
           <div>
-            <h3 className="font-heading text-2xl sm:text-3xl font-bold text-white tracking-widest mb-4">
-              ERODE RIFLES
-            </h3>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-8 bg-erode-green rounded-full" />
+              <div>
+                <span className="font-heading text-xl font-bold text-white tracking-[0.2em] block leading-none">ERODE</span>
+                <span className="font-heading text-xs font-bold text-erode-green tracking-[0.3em] block leading-none">RIFLES</span>
+              </div>
+            </div>
             <p className="text-sm text-white/60 leading-relaxed mb-6">
-              Your premier destination for premium air rifles, air pistols,
-              pellets, and shooting accessories in Erode, Tamil Nadu.
-              Professional training programs available for all skill levels.
+              Experience the thrill of precision shooting with Erode Rifles. From premium air guns to top-quality accessories and spare parts, we&apos;re your trusted partner for all your shooting needs.
             </p>
             <div className="flex items-center gap-3">
               <a
@@ -97,7 +100,7 @@ export default function Footer() {
           {/* Column 3: Categories */}
           <div>
             <h4 className="font-heading text-sm font-bold text-white/40 tracking-widest mb-4 uppercase">
-              Categories
+              Product Category
             </h4>
             <ul className="space-y-3">
               {categoryLinks.map((link) => (
@@ -113,10 +116,10 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Contact */}
+          {/* Column 4: Contact - Verified from eroderifles.com */}
           <div>
             <h4 className="font-heading text-sm font-bold text-white/40 tracking-widest mb-4 uppercase">
-              Contact Us
+              Contact Information
             </h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
@@ -126,13 +129,13 @@ export default function Footer() {
                     href="tel:+919994893337"
                     className="text-sm text-white/70 hover:text-erode-green transition-colors duration-200"
                   >
-                    +91 9994893337
+                    {storeInfo.phone1}
                   </a>
                   <a
                     href="tel:+919842991959"
                     className="text-sm text-white/70 hover:text-erode-green transition-colors duration-200"
                   >
-                    +91 9842991959
+                    {storeInfo.phone2}
                   </a>
                 </div>
               </li>
@@ -142,14 +145,21 @@ export default function Footer() {
                   href="mailto:contact@eroderifles.com"
                   className="text-sm text-white/70 hover:text-erode-green transition-colors duration-200"
                 >
-                  contact@eroderifles.com
+                  {storeInfo.email}
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin size={16} className="text-erode-green mt-0.5 flex-shrink-0" />
                 <span className="text-sm text-white/70">
-                  Opp SDS Gaden, Therku Pallam Road, Keel Thindal, Tamil Nadu 638012
+                  {storeInfo.address}
                 </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Clock size={16} className="text-erode-green mt-0.5 flex-shrink-0" />
+                <div>
+                  <span className="text-sm text-white/70 block">{storeInfo.hours}</span>
+                  <span className="text-sm text-erode-green font-medium">{storeInfo.sundayHours}</span>
+                </div>
               </li>
             </ul>
           </div>
@@ -160,7 +170,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/40">
-            &copy; 2025 Erode Rifles. All rights reserved.
+            &copy; {new Date().getFullYear()} Erode Rifles. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <button
@@ -173,7 +183,7 @@ export default function Footer() {
               onClick={() => handleNavClick("/terms")}
               className="text-xs text-white/40 hover:text-erode-green transition-colors cursor-pointer"
             >
-              Terms & Conditions
+              Terms &amp; Conditions
             </button>
           </div>
           <button

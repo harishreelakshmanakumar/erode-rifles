@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search, Heart, ShoppingCart, User, Menu, X, LogOut, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, Heart, ShoppingCart, User, Menu, X, LogOut, ChevronDown, Phone } from "lucide-react";
 import { useRouter } from "@/context/RouterContext";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -37,15 +37,22 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
+  // Track previous path to close menus on navigation
+  const prevPath = useRef(path);
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional UI reset on navigation
-    setMobileOpen(false);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional UI reset on navigation
-    setSearchOpen(false);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional UI reset on navigation
-    setUserMenuOpen(false);
+    if (prevPath.current !== path) {
+      prevPath.current = path;
+    }
   }, [path]);
+  // Close menus when path changes (handled via handleNavClick instead)
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handleClick = () => setUserMenuOpen(false);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [userMenuOpen]);
 
   const handleNavClick = (navPath) => {
     navigate(navPath);
@@ -71,21 +78,55 @@ export default function Navbar() {
 
   return (
     <>
+      {/* Top bar - contact info */}
+      <div className="bg-erode-black text-white/70 text-xs hidden lg:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <a href="tel:+919994893337" className="flex items-center gap-1.5 hover:text-erode-green transition-colors">
+              <Phone size={12} />
+              +91 999 489 3337
+            </a>
+            <a href="tel:+919842991959" className="flex items-center gap-1.5 hover:text-erode-green transition-colors">
+              <Phone size={12} />
+              +91 984 299 1959
+            </a>
+            <a href="mailto:contact@eroderifles.com" className="hover:text-erode-green transition-colors">
+              contact@eroderifles.com
+            </a>
+          </div>
+          <div className="flex items-center gap-4">
+            <span>Mon - Sun: 9:00 AM - 9:00 PM</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Navbar */}
       <header
-        className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${
-          scrolled ? "shadow-md" : "border-b border-gray-100"
+        className={`sticky top-0 z-50 bg-white transition-all duration-300 ${
+          scrolled
+            ? "shadow-lg shadow-black/5"
+            : "border-b border-gray-100"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
+          <div className="flex items-center justify-between h-16 sm:h-18 lg:h-20">
             {/* Logo - More Prominent */}
             <button
               onClick={() => handleNavClick("/")}
               className="flex-shrink-0 cursor-pointer group"
             >
-              <span className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-erode-black tracking-widest group-hover:text-erode-green transition-colors duration-300">
-                ERODE RIFLES
-              </span>
+              <div className="flex items-center gap-2">
+                {/* Green accent bar */}
+                <div className="w-1 h-8 sm:h-10 bg-erode-green rounded-full group-hover:h-12 transition-all duration-300" />
+                <div>
+                  <span className="font-heading text-xl sm:text-2xl lg:text-3xl font-bold text-erode-black tracking-[0.2em] leading-none block">
+                    ERODE
+                  </span>
+                  <span className="font-heading text-sm sm:text-base lg:text-lg font-bold text-erode-green tracking-[0.3em] leading-none block">
+                    RIFLES
+                  </span>
+                </div>
+              </div>
             </button>
 
             {/* Desktop Nav Links */}
@@ -94,10 +135,10 @@ export default function Navbar() {
                 <button
                   key={link.path}
                   onClick={() => handleNavClick(link.path)}
-                  className={`relative px-4 py-2 text-sm font-medium tracking-wide uppercase transition-colors duration-200 cursor-pointer rounded-lg ${
+                  className={`relative px-4 py-2 text-[13px] font-semibold tracking-widest uppercase transition-colors duration-200 cursor-pointer rounded-lg ${
                     isActive(link.path)
                       ? "text-erode-green"
-                      : "text-erode-black/70 hover:text-erode-black hover:bg-gray-50"
+                      : "text-erode-black/60 hover:text-erode-black hover:bg-gray-50"
                   }`}
                 >
                   {link.label}
@@ -121,22 +162,22 @@ export default function Navbar() {
                 className={`p-2.5 rounded-lg transition-all duration-200 cursor-pointer ${
                   searchOpen
                     ? "bg-erode-green/10 text-erode-green"
-                    : "text-erode-black/70 hover:text-erode-black hover:bg-gray-50"
+                    : "text-erode-black/60 hover:text-erode-black hover:bg-gray-50"
                 }`}
                 aria-label="Search"
               >
-                <Search size={20} />
+                <Search size={18} />
               </button>
 
               {/* Wishlist */}
               <button
-                onClick={() => handleNavClick("/wishlist")}
-                className="relative p-2.5 rounded-lg text-erode-black/70 hover:text-erode-black hover:bg-gray-50 transition-all duration-200 cursor-pointer"
+                onClick={() => handleNavClick("/dashboard")}
+                className="relative p-2.5 rounded-lg text-erode-black/60 hover:text-erode-black hover:bg-gray-50 transition-all duration-200 cursor-pointer"
                 aria-label="Wishlist"
               >
-                <Heart size={20} />
+                <Heart size={18} />
                 {wishlistItems.length > 0 && (
-                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {wishlistItems.length}
                   </span>
                 )}
@@ -145,12 +186,12 @@ export default function Navbar() {
               {/* Cart */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2.5 rounded-lg text-erode-black/70 hover:text-erode-black hover:bg-gray-50 transition-all duration-200 cursor-pointer"
+                className="relative p-2.5 rounded-lg text-erode-black/60 hover:text-erode-black hover:bg-gray-50 transition-all duration-200 cursor-pointer"
                 aria-label="Cart"
               >
-                <ShoppingCart size={20} />
+                <ShoppingCart size={18} />
                 {count > 0 && (
-                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {count}
                   </span>
                 )}
@@ -160,15 +201,15 @@ export default function Navbar() {
               {user ? (
                 <div className="relative">
                   <button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-erode-black/70 hover:text-erode-black hover:bg-gray-50 rounded-lg transition-all duration-200 cursor-pointer"
+                    onClick={(e) => { e.stopPropagation(); setUserMenuOpen(!userMenuOpen); }}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-erode-black/60 hover:text-erode-black hover:bg-gray-50 rounded-lg transition-all duration-200 cursor-pointer"
                   >
                     <div className="w-8 h-8 rounded-full bg-erode-green/20 flex items-center justify-center">
                       <span className="text-erode-green text-xs font-bold">
                         {user.name?.charAt(0)?.toUpperCase()}
                       </span>
                     </div>
-                    <span className="hidden xl:inline">{user.name?.split(" ")[0]}</span>
+                    <span className="hidden xl:inline text-sm">{user.name?.split(" ")[0]}</span>
                     <ChevronDown size={14} className={`transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
                   </button>
 
@@ -213,7 +254,7 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Right Icons */}
-            <div className="flex lg:hidden items-center gap-1">
+            <div className="flex lg:hidden items-center gap-0.5">
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2 text-erode-black cursor-pointer"
@@ -303,9 +344,13 @@ export default function Navbar() {
             >
               {/* Drawer Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-                <span className="font-heading text-2xl font-bold text-erode-black tracking-widest">
-                  ERODE RIFLES
-                </span>
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-8 bg-erode-green rounded-full" />
+                  <div>
+                    <span className="font-heading text-lg font-bold text-erode-black tracking-[0.2em] block leading-none">ERODE</span>
+                    <span className="font-heading text-xs font-bold text-erode-green tracking-[0.3em] block leading-none">RIFLES</span>
+                  </div>
+                </div>
                 <button
                   onClick={() => setMobileOpen(false)}
                   className="p-2 text-erode-black hover:text-erode-green transition-colors cursor-pointer"
@@ -343,7 +388,7 @@ export default function Navbar() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
                     onClick={() => handleNavClick(link.path)}
-                    className={`flex items-center justify-between w-full text-left py-3.5 text-base font-medium tracking-wide uppercase transition-colors duration-200 cursor-pointer border-b border-gray-50 ${
+                    className={`flex items-center justify-between w-full text-left py-3.5 text-base font-semibold tracking-wide uppercase transition-colors duration-200 cursor-pointer border-b border-gray-50 ${
                       isActive(link.path)
                         ? "text-erode-green"
                         : "text-erode-black hover:text-erode-green"
@@ -358,8 +403,8 @@ export default function Navbar() {
 
                 {/* Wishlist Link */}
                 <button
-                  onClick={() => handleNavClick("/wishlist")}
-                  className="flex items-center gap-3 w-full text-left py-3.5 text-base font-medium tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-50"
+                  onClick={() => handleNavClick("/dashboard")}
+                  className="flex items-center gap-3 w-full text-left py-3.5 text-base font-semibold tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-50"
                 >
                   <Heart size={18} />
                   Wishlist
@@ -375,7 +420,7 @@ export default function Navbar() {
                   <>
                     <button
                       onClick={() => handleNavClick(isAdmin ? "/admin" : "/dashboard")}
-                      className="flex items-center gap-3 w-full text-left py-3.5 text-base font-medium tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-50"
+                      className="flex items-center gap-3 w-full text-left py-3.5 text-base font-semibold tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-50"
                     >
                       <User size={18} />
                       {isAdmin ? "Admin Panel" : "My Dashboard"}
@@ -385,7 +430,7 @@ export default function Navbar() {
                         logout();
                         setMobileOpen(false);
                       }}
-                      className="flex items-center gap-3 w-full text-left py-3.5 text-base font-medium tracking-wide uppercase text-red-500 hover:text-red-600 transition-colors cursor-pointer border-b border-gray-50"
+                      className="flex items-center gap-3 w-full text-left py-3.5 text-base font-semibold tracking-wide uppercase text-red-500 hover:text-red-600 transition-colors cursor-pointer border-b border-gray-50"
                     >
                       <LogOut size={18} />
                       Sign Out
@@ -409,6 +454,15 @@ export default function Navbar() {
                   </div>
                 )}
               </nav>
+
+              {/* Mobile Contact Info */}
+              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+                <div className="flex items-center gap-2 text-sm text-erode-black/60 mb-2">
+                  <Phone size={14} className="text-erode-green" />
+                  <a href="tel:+919994893337" className="hover:text-erode-green transition-colors">+91 999 489 3337</a>
+                </div>
+                <p className="text-xs text-erode-black/40">Mon - Sun: 9:00 AM - 9:00 PM</p>
+              </div>
             </motion.div>
           </motion.div>
         )}

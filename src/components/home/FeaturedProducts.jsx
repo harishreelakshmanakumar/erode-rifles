@@ -37,23 +37,22 @@ export default function FeaturedProducts() {
           {featured.map((product, index) => (
             <motion.div
               key={product.id}
-              className="border border-gray-100 rounded-xl overflow-hidden group hover:shadow-lg hover:border-erode-green/20 transition-all duration-300"
+              className="border border-gray-100 rounded-xl overflow-hidden group hover:shadow-lg hover:border-erode-green/20 transition-all duration-300 flex flex-col"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{
-                y: -4,
-              }}
+              whileHover={{ y: -4 }}
             >
-              {/* Image with fixed container */}
-              <div className="relative overflow-hidden bg-gray-50">
-                <div className="w-full h-48 sm:h-56 flex items-center justify-center p-4">
+              {/* Image with fixed aspect ratio container */}
+              <div className="relative overflow-hidden bg-gray-50 flex-shrink-0">
+                <div className="w-full aspect-[4/3] flex items-center justify-center p-4 sm:p-6">
                   <img
                     src={product.image}
                     alt={product.name}
                     className="max-w-full max-h-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
                     onError={handleImageError}
+                    loading="lazy"
                   />
                 </div>
                 <span className="absolute top-3 left-3 bg-erode-green text-erode-black text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full z-10">
@@ -61,29 +60,24 @@ export default function FeaturedProducts() {
                 </span>
 
                 {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 ease-out" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 ease-out" />
               </div>
 
               {/* Content */}
-              <div className="p-5 space-y-3">
-                <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-erode-black/50 border border-erode-black/10 rounded-full px-2.5 py-0.5">
+              <div className="p-5 space-y-3 flex-1 flex flex-col">
+                <span className="inline-block w-fit text-[10px] font-semibold uppercase tracking-wider text-erode-black/50 border border-erode-black/10 rounded-full px-2.5 py-0.5">
                   {product.category}
                 </span>
-                <h3 className="font-semibold text-lg text-erode-black line-clamp-1">
+                <h3 className="font-semibold text-base sm:text-lg text-erode-black line-clamp-1">
                   {product.name}
                 </h3>
                 <p className="text-sm text-erode-black/50 line-clamp-2 leading-relaxed">
                   {product.shortDescription}
                 </p>
-                <div className="flex items-baseline gap-2">
-                  <p className="font-bold text-erode-black text-xl">
+                <div className="flex items-baseline gap-2 mt-auto">
+                  <p className="font-bold text-erode-black text-lg sm:text-xl">
                     ₹{product.price.toLocaleString("en-IN")}
                   </p>
-                  {product.originalPrice && (
-                    <p className="text-sm text-erode-black/40 line-through">
-                      ₹{product.originalPrice.toLocaleString("en-IN")}
-                    </p>
-                  )}
                 </div>
                 <button
                   onClick={() =>
@@ -91,7 +85,7 @@ export default function FeaturedProducts() {
                       slug: product.slug,
                     })
                   }
-                  className="w-full flex items-center justify-center gap-2 border-2 border-erode-black text-erode-black font-semibold py-2.5 rounded-lg hover:bg-erode-black hover:text-white transition-colors cursor-pointer group/btn"
+                  className="w-full flex items-center justify-center gap-2 border-2 border-erode-black text-erode-black font-semibold py-2.5 rounded-lg hover:bg-erode-black hover:text-white transition-colors cursor-pointer group/btn text-sm"
                 >
                   View Details
                   <ArrowRight size={16} className="transition-transform duration-200 group-hover/btn:translate-x-0.5" />

@@ -45,7 +45,7 @@ export default function Checkout() {
   const handlePlaceOrder = async () => {
     setSubmitting(true);
     try {
-      // Submit order to API
+      // Submit order to API with all required fields
       const orderData = {
         customerName: address.fullName,
         email: address.email,
@@ -93,7 +93,7 @@ export default function Checkout() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <div className="mb-6">
         <h1 className="font-heading text-3xl sm:text-4xl text-erode-black">Checkout</h1>
         <p className="text-sm text-erode-black/50 mt-1">

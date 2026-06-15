@@ -20,21 +20,27 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0 }}
           >
-            <h1 className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-erode-black leading-none tracking-wider">
-              ERODE
-              <span className="block text-erode-green">RIFLES</span>
-            </h1>
+            <div className="flex items-center gap-3 justify-center md:justify-start">
+              <div className="w-1.5 h-16 sm:h-20 md:h-24 bg-erode-green rounded-full" />
+              <div>
+                <h1 className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-erode-black leading-none tracking-wider">
+                  ERODE
+                </h1>
+                <h1 className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-erode-green leading-none tracking-wider">
+                  RIFLES
+                </h1>
+              </div>
+            </div>
           </motion.div>
 
-          {/* Tagline */}
+          {/* Tagline - Verified from eroderifles.com */}
           <motion.p
             className="text-erode-black/60 text-base sm:text-lg md:text-xl max-w-xl mx-auto md:mx-0 leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Your premier destination for premium air rifles, air pistols, pellets, and
-            professional shooting training in Erode, Tamil Nadu.
+            Welcome to Erode Rifles, your best Air Rifles and comprehensive training programs. Whether you&apos;re a beginner or a seasoned shooter, we have the perfect air rifle to meet your needs.
           </motion.p>
 
           {/* Trust indicators */}
@@ -54,7 +60,7 @@ export default function Hero() {
             </span>
             <span className="flex items-center gap-1.5">
               <Users size={16} className="text-erode-green" />
-              Trusted by Shooters
+              5000+ Happy Customers
             </span>
           </motion.div>
 
