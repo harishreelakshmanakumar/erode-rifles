@@ -26,8 +26,13 @@ export default function LoginForm() {
     }
 
     try {
-      await login(email, password);
-      navigate("/dashboard");
+      const userData = await login(email, password);
+      // Redirect based on role
+      if (userData?.role === "ADMIN") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setError(err.message || "Invalid email or password. Please try again.");
     }

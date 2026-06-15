@@ -6,7 +6,7 @@ import { storeInfo } from "@/data/mockData";
 
 // Helper to build API URLs through the Caddy gateway
 function apiUrl(path) {
-  return `/api/${path}?XTransformPort=3001`;
+  return `/api/${path}`;
 }
 
 export default function Contact() {

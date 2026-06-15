@@ -3,9 +3,9 @@ import { createContext, useContext, useState, useCallback } from "react";
 
 const AuthContext = createContext();
 
-// Helper to build API URLs through the Caddy gateway
+// Helper to build API URLs — Next.js API routes proxy to backend
 function apiUrl(path) {
-  return `/api/${path}?XTransformPort=3001`;
+  return `/api/${path}`;
 }
 
 function getInitialUser() {

@@ -70,3 +70,25 @@ Stage Summary:
 - About Us Section: Premium redesign with elegant vertical line tagline separators, professional typography hierarchy, visual enhancements
 - Both changes maintain brand colors (White #FFFFFF, Black #111111, Military Green #B8D63C)
 - No zoom, no magnifier, no fullscreen lightbox, no hover effects on product images
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Set up admin panel access and fix API proxy
+
+Work Log:
+- Discovered admin panel UI already existed (7 admin pages + sidebar)
+- Discovered backend API service already running on port 3001 with full schema (Users, Products, Orders, Testimonials, etc.)
+- Fixed login redirect: admin users now go to /admin, regular users to /dashboard
+- Created Next.js API proxy routes (/api/auth/[...]/route.ts and /api/[...]/route.ts) to forward requests to port 3001
+- Updated all apiUrl() functions across 4 files to remove XTransformPort=3001 query param
+- Files updated: AuthContext.jsx, AdminDashboard.jsx, Checkout.jsx, Contact.jsx, ProductTable.jsx
+- Verified admin login flow works end-to-end via browser
+- Verified all admin pages render: Dashboard, Products, Orders, Testimonials, Events, Training, Settings
+- Navbar already has admin access: user dropdown shows "Admin Panel" for admin users
+
+Stage Summary:
+- Admin panel accessible via: Login as admin → auto-redirect to /admin, or user dropdown → "Admin Panel"
+- Admin credentials: admin@eroderifles.com / admin123
+- API proxy working: Next.js routes forward /api/* to backend on port 3001
+- All admin pages functional: Dashboard with stats/orders, Products with CRUD, Orders with status management, Testimonials, Events, Training, Settings
