@@ -9,10 +9,10 @@ export default function SpecsTable({ specifications }) {
 
   return (
     <div>
-      <h2 className="font-heading text-2xl text-erode-black mb-4">
+      <h2 className="font-heading text-3xl text-erode-black mb-4">
         Specifications
       </h2>
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
         <table className="w-full">
           <tbody>
             {entries.map(([key, value], index) => (
@@ -20,10 +20,10 @@ export default function SpecsTable({ specifications }) {
                 key={key}
                 className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
               >
-                <td className="px-4 py-3 text-sm font-semibold text-erode-black border-r border-gray-200 w-1/3">
+                <td className="block sm:table-cell px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-erode-black sm:border-r border-gray-200 sm:w-1/3">
                   {key}
                 </td>
-                <td className="px-4 py-3 text-sm text-erode-black">
+                <td className="block sm:table-cell px-4 pb-3 sm:py-3 text-sm text-erode-black">
                   {value}
                 </td>
               </tr>

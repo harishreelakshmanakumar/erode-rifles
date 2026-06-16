@@ -14,7 +14,7 @@ export default function RelatedProducts({ currentProductId, category }) {
 
   return (
     <div>
-      <h2 className="font-heading text-2xl text-erode-black mb-4">
+      <h2 className="font-heading text-3xl text-erode-black mb-4">
         You May Also Like
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

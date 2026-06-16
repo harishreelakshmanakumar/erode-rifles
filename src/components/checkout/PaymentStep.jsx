@@ -8,7 +8,9 @@ import {
   CreditCard,
   Building2,
   Banknote,
+  CheckCircle2,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const paymentMethods = [
   { id: "upi", label: "UPI", icon: Smartphone, desc: "Pay via UPI (GPay, PhonePe, etc.)" },
@@ -30,24 +32,30 @@ export default function PaymentStep({ onPlaceOrder }) {
   };
 
   return (
-    <div className="max-w-lg mx-auto">
-      <h2 className="font-heading text-2xl text-erode-black mb-6">
+    <div className="max-w-2xl mx-auto rounded-3xl border border-gray-100 bg-white p-5 shadow-xl shadow-black/5 sm:p-7">
+      <h2 className="font-heading text-3xl sm:text-4xl text-erode-black mb-2 leading-none">
         Payment Method
       </h2>
+      <p className="mb-6 text-sm text-erode-black/50">
+        Choose a payment option to finish your order.
+      </p>
 
-      <div className="space-y-3 mb-6">
-        {paymentMethods.map((method) => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        {paymentMethods.map((method, index) => {
           const Icon = method.icon;
           const isActive = selected === method.id;
 
           return (
-            <button
+            <motion.button
               key={method.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.04 }}
               onClick={() => setSelected(method.id)}
-              className={`w-full flex items-center gap-4 p-4 rounded-lg border-2 transition-colors text-left ${
+              className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
                 isActive
-                  ? "border-erode-green bg-erode-green/5"
-                  : "border-gray-200 bg-white hover:border-gray-300"
+                  ? "border-erode-green bg-erode-green/10 shadow-sm"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:-translate-y-0.5"
               }`}
             >
               <div
@@ -67,22 +75,18 @@ export default function PaymentStep({ onPlaceOrder }) {
                 </p>
                 <p className="text-xs text-gray-500">{method.desc}</p>
               </div>
-              <div
-                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  isActive ? "border-erode-green" : "border-gray-300"
-                }`}
-              >
-                {isActive && (
-                  <div className="w-2.5 h-2.5 rounded-full bg-erode-green" />
-                )}
-              </div>
-            </button>
+              {isActive ? (
+                <CheckCircle2 className="size-5 text-erode-green" />
+              ) : (
+                <div className="w-5 h-5 rounded-full border-2 border-gray-300" />
+              )}
+            </motion.button>
           );
         })}
       </div>
 
       {/* Order Total */}
-      <div className="border border-gray-200 rounded-lg p-4 bg-white mb-6">
+      <div className="border border-gray-200 rounded-2xl p-4 bg-gray-50 mb-6">
         <div className="flex justify-between items-center">
           <span className="text-gray-500">Order Total</span>
           <span className="font-bold text-lg text-erode-black">
@@ -94,7 +98,7 @@ export default function PaymentStep({ onPlaceOrder }) {
       <Button
         onClick={handlePlaceOrder}
         disabled={placing}
-        className="w-full bg-erode-green hover:bg-erode-green/90 text-erode-black font-semibold h-12 text-base"
+        className="w-full bg-erode-green hover:bg-erode-green/90 text-erode-black font-semibold h-12 text-base rounded-xl"
       >
         {placing ? (
           <span className="flex items-center gap-2">

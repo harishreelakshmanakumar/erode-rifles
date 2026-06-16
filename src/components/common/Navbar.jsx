@@ -105,9 +105,9 @@ export default function Navbar() {
 
       {/* Main Navbar */}
       <header
-        className={`sticky top-0 z-50 bg-white transition-all duration-300 ${
+        className={`sticky top-0 z-50 bg-white/95 backdrop-blur-xl transition-all duration-300 ${
           scrolled
-            ? "shadow-lg shadow-black/5"
+            ? "shadow-lg shadow-black/5 border-b border-gray-100"
             : "border-b border-gray-100"
         }`}
       >
@@ -116,11 +116,11 @@ export default function Navbar() {
             {/* Logo - More Prominent */}
             <button
               onClick={() => handleNavClick("/")}
-              className="flex-shrink-0 cursor-pointer group"
+              className="flex-shrink-0 cursor-pointer group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-erode-green/40"
             >
               <div className="flex items-center gap-2">
                 {/* Green accent bar */}
-                <div className="w-1 h-8 sm:h-10 bg-erode-green rounded-full group-hover:h-12 transition-all duration-300" />
+                <div className="w-1.5 h-9 sm:h-10 bg-erode-green rounded-full group-hover:h-12 transition-all duration-300 shadow-[0_0_18px_rgba(184,214,60,0.45)]" />
                 <div>
                   <span className="font-heading text-xl sm:text-2xl lg:text-3xl font-bold text-erode-black tracking-[0.2em] leading-none block">
                     ERODE
@@ -133,15 +133,15 @@ export default function Navbar() {
             </button>
 
             {/* Desktop Nav Links */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-1 rounded-full border border-gray-100 bg-gray-50/80 p-1">
               {navLinks.map((link) => (
                 <button
                   key={link.path}
                   onClick={() => handleNavClick(link.path)}
-                  className={`relative px-4 py-2 text-[13px] font-semibold tracking-widest uppercase transition-colors duration-200 cursor-pointer rounded-lg ${
+                  className={`relative px-4 py-2 text-[13px] font-semibold tracking-widest uppercase transition-all duration-200 cursor-pointer rounded-full ${
                     isActive(link.path)
-                      ? "text-erode-green"
-                      : "text-erode-black/60 hover:text-erode-black hover:bg-gray-50"
+                      ? "text-erode-black bg-white shadow-sm"
+                      : "text-erode-black/60 hover:text-erode-black hover:bg-white/80"
                   }`}
                 >
                   {link.label}
@@ -149,7 +149,7 @@ export default function Navbar() {
                   {isActive(link.path) && (
                     <motion.div
                       layoutId="activeNav"
-                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-erode-green rounded-full"
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-erode-green rounded-full"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -158,13 +158,13 @@ export default function Navbar() {
             </nav>
 
             {/* Desktop Right Icons */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1.5">
               {/* Search */}
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
                 className={`p-2.5 rounded-lg transition-all duration-200 cursor-pointer ${
                   searchOpen
-                    ? "bg-erode-green/10 text-erode-green"
+                    ? "bg-erode-green/15 text-erode-black"
                     : "text-erode-black/60 hover:text-erode-black hover:bg-gray-50"
                 }`}
                 aria-label="Search"
@@ -180,7 +180,7 @@ export default function Navbar() {
               >
                 <Heart size={18} />
                 {mounted && wishlistItems.length > 0 && (
-                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
                     {wishlistItems.length}
                   </span>
                 )}
@@ -194,7 +194,7 @@ export default function Navbar() {
               >
                 <ShoppingCart size={18} />
                 {mounted && count > 0 && (
-                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute top-1 right-1 bg-erode-green text-erode-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
                     {count}
                   </span>
                 )}
@@ -248,7 +248,7 @@ export default function Navbar() {
               ) : (
                 <button
                   onClick={() => handleNavClick("/login")}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-erode-green text-erode-black rounded-lg hover:bg-erode-green/90 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-erode-green text-erode-black rounded-full hover:bg-erode-green/90 hover:-translate-y-0.5 transition-all cursor-pointer shadow-sm"
                 >
                   <User size={16} />
                   Login
@@ -257,10 +257,17 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Right Icons */}
-            <div className="flex lg:hidden items-center gap-0.5">
+            <div className="flex lg:hidden items-center gap-1">
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="p-2.5 rounded-full text-erode-black bg-gray-50 cursor-pointer"
+                aria-label="Search"
+              >
+                <Search size={19} />
+              </button>
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 text-erode-black cursor-pointer"
+                className="relative p-2.5 rounded-full text-erode-black bg-gray-50 cursor-pointer"
                 aria-label="Cart"
               >
                 <ShoppingCart size={20} />
@@ -272,7 +279,7 @@ export default function Navbar() {
               </button>
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="p-2 text-erode-black cursor-pointer"
+                className="p-2.5 rounded-full text-erode-black bg-erode-green cursor-pointer"
                 aria-label="Menu"
               >
                 {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -288,7 +295,7 @@ export default function Navbar() {
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="hidden lg:block overflow-hidden"
+                className="overflow-hidden"
               >
                 <form onSubmit={handleSearch} className="flex items-center gap-2 pb-4">
                   <div className="flex-1 relative">
@@ -307,7 +314,7 @@ export default function Navbar() {
                   </div>
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-erode-green text-erode-black font-semibold rounded-xl text-sm hover:bg-erode-green/90 transition-colors cursor-pointer"
+                    className="hidden sm:block px-6 py-3 bg-erode-green text-erode-black font-semibold rounded-xl text-sm hover:bg-erode-green/90 transition-colors cursor-pointer"
                   >
                     Search
                   </button>
@@ -333,7 +340,7 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/50"
+              className="absolute inset-0 bg-black/55 backdrop-blur-sm"
               onClick={() => setMobileOpen(false)}
             />
 
@@ -343,20 +350,20 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }}
-              className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white flex flex-col"
+              className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white flex flex-col shadow-2xl"
             >
               {/* Drawer Header */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-erode-black text-white">
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-8 bg-erode-green rounded-full" />
                   <div>
-                    <span className="font-heading text-lg font-bold text-erode-black tracking-[0.2em] block leading-none">ERODE</span>
+                    <span className="font-heading text-lg font-bold text-white tracking-[0.2em] block leading-none">ERODE</span>
                     <span className="font-heading text-xs font-bold text-erode-green tracking-[0.3em] block leading-none">RIFLES</span>
                   </div>
                 </div>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="p-2 text-erode-black hover:text-erode-green transition-colors cursor-pointer"
+                  className="p-2 rounded-full bg-white/10 text-white hover:text-erode-green transition-colors cursor-pointer"
                   aria-label="Close menu"
                 >
                   <X size={24} />
@@ -364,7 +371,7 @@ export default function Navbar() {
               </div>
 
               {/* Mobile Search */}
-              <div className="px-6 py-4 border-b border-gray-100">
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/70">
                 <form onSubmit={handleSearch} className="flex items-center gap-2">
                   <div className="flex-1 relative">
                     <Search
@@ -391,10 +398,10 @@ export default function Navbar() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
                     onClick={() => handleNavClick(link.path)}
-                    className={`flex items-center justify-between w-full text-left py-3.5 text-base font-semibold tracking-wide uppercase transition-colors duration-200 cursor-pointer border-b border-gray-50 ${
+                    className={`flex items-center justify-between w-full text-left my-1 rounded-xl px-3 py-3.5 text-base font-semibold tracking-wide uppercase transition-all duration-200 cursor-pointer ${
                       isActive(link.path)
-                        ? "text-erode-green"
-                        : "text-erode-black hover:text-erode-green"
+                        ? "text-erode-black bg-erode-green/15"
+                        : "text-erode-black hover:text-erode-green hover:bg-gray-50"
                     }`}
                   >
                     {link.label}
@@ -407,7 +414,7 @@ export default function Navbar() {
                 {/* Wishlist Link */}
                 <button
                   onClick={() => handleNavClick("/dashboard")}
-                  className="flex items-center gap-3 w-full text-left py-3.5 text-base font-semibold tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-50"
+                  className="flex items-center gap-3 w-full text-left my-1 rounded-xl px-3 py-3.5 text-base font-semibold tracking-wide uppercase text-erode-black hover:text-erode-green hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <Heart size={18} />
                   Wishlist
@@ -423,7 +430,7 @@ export default function Navbar() {
                   <>
                     <button
                       onClick={() => handleNavClick(isAdmin ? "/admin" : "/dashboard")}
-                      className="flex items-center gap-3 w-full text-left py-3.5 text-base font-semibold tracking-wide uppercase text-erode-black hover:text-erode-green transition-colors cursor-pointer border-b border-gray-50"
+                      className="flex items-center gap-3 w-full text-left my-1 rounded-xl px-3 py-3.5 text-base font-semibold tracking-wide uppercase text-erode-black hover:text-erode-green hover:bg-gray-50 transition-colors cursor-pointer"
                     >
                       <User size={18} />
                       {isAdmin ? "Admin Panel" : "My Dashboard"}
@@ -433,7 +440,7 @@ export default function Navbar() {
                         logout();
                         setMobileOpen(false);
                       }}
-                      className="flex items-center gap-3 w-full text-left py-3.5 text-base font-semibold tracking-wide uppercase text-red-500 hover:text-red-600 transition-colors cursor-pointer border-b border-gray-50"
+                      className="flex items-center gap-3 w-full text-left my-1 rounded-xl px-3 py-3.5 text-base font-semibold tracking-wide uppercase text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                     >
                       <LogOut size={18} />
                       Sign Out

@@ -10,13 +10,13 @@ export default function ReviewStep({ address, onNext, onBack }) {
   const grandTotal = total + shipping;
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="font-heading text-2xl text-erode-black mb-6">
+    <div className="max-w-3xl mx-auto rounded-3xl border border-gray-100 bg-white p-5 shadow-xl shadow-black/5 sm:p-7">
+      <h2 className="font-heading text-3xl sm:text-4xl text-erode-black mb-6 leading-none">
         Review Your Order
       </h2>
 
       {/* Address */}
-      <div className="border border-gray-100 rounded-xl p-5 bg-white mb-6">
+      <div className="border border-gray-100 rounded-2xl p-4 sm:p-5 bg-gray-50/70 mb-5">
         <h3 className="font-semibold text-erode-black text-sm mb-3 flex items-center gap-2">
           <MapPin size={16} className="text-erode-green" />
           Shipping Address
@@ -37,10 +37,10 @@ export default function ReviewStep({ address, onNext, onBack }) {
       </div>
 
       {/* Cart Items */}
-      <div className="border border-gray-100 rounded-xl overflow-hidden mb-6">
+      <div className="border border-gray-100 rounded-2xl overflow-hidden mb-5">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
+            <tr className="hidden sm:table-row bg-gray-50 border-b border-gray-100">
               <th className="text-left px-4 py-3 font-medium text-gray-500">Item</th>
               <th className="text-center px-4 py-3 font-medium text-gray-500">Qty</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Price</th>
@@ -48,10 +48,10 @@ export default function ReviewStep({ address, onNext, onBack }) {
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.id} className="border-b border-gray-50 last:border-b-0">
-                <td className="px-4 py-3">
+              <tr key={item.id} className="block sm:table-row border-b border-gray-50 last:border-b-0">
+                <td className="block sm:table-cell px-4 pt-4 pb-2 sm:py-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <div className="w-12 h-12 sm:w-10 sm:h-10 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       <img
                         src={item.image}
                         alt={item.name}
@@ -61,8 +61,10 @@ export default function ReviewStep({ address, onNext, onBack }) {
                     <span className="font-medium text-erode-black text-sm">{item.name}</span>
                   </div>
                 </td>
-                <td className="text-center px-4 py-3">{item.qty}</td>
-                <td className="text-right px-4 py-3 font-medium">
+                <td className="inline-block sm:table-cell px-4 pb-4 sm:py-3 text-gray-500 sm:text-center">
+                  <span className="sm:hidden">Qty: </span>{item.qty}
+                </td>
+                <td className="inline-block float-right sm:float-none sm:table-cell px-4 pb-4 sm:py-3 font-medium text-right">
                   ₹{(item.price * item.qty).toLocaleString("en-IN")}
                 </td>
               </tr>
@@ -72,7 +74,7 @@ export default function ReviewStep({ address, onNext, onBack }) {
       </div>
 
       {/* Totals */}
-      <div className="border border-gray-100 rounded-xl p-5 bg-white mb-6">
+      <div className="border border-gray-100 rounded-2xl p-5 bg-white mb-6 shadow-sm">
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-500">Subtotal</span>
@@ -99,7 +101,7 @@ export default function ReviewStep({ address, onNext, onBack }) {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:gap-4">
         <Button variant="outline" onClick={onBack} className="gap-2 h-12 px-6 rounded-xl border-gray-200">
           <ArrowLeft className="size-4" />
           Back

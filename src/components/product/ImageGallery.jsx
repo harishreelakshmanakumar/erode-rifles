@@ -16,19 +16,19 @@ export default function ImageGallery({ images = [] }) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 sm:gap-4">
       {/* Main Image — same aspect-[4/3] as ProductCard, no zoom */}
-      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+      <div className="relative w-full aspect-[1.04/1] sm:aspect-[4/3] rounded-2xl sm:rounded-xl overflow-hidden border border-gray-100 bg-[radial-gradient(circle_at_top_left,rgba(184,214,60,0.18),transparent_42%),#f8f8f8] shadow-sm">
         <AnimatePresence mode="wait">
           <motion.img
             key={selectedIndex}
             src={images[selectedIndex]}
             alt="Product image"
-            className="w-full h-full object-contain p-4 sm:p-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            className="w-full h-full object-contain p-5 sm:p-6"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.99 }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
             onError={handleImageError}
           />
         </AnimatePresence>
@@ -39,7 +39,7 @@ export default function ImageGallery({ images = [] }) {
 
       {/* Thumbnails — consistent sizes */}
       {images.length > 1 && (
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1">
           {images.map((img, idx) => (
             <button
               key={idx}
