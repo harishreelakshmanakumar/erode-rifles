@@ -6,5 +6,13 @@
     "phone": null,
     "role": "USER",
     "googleId": "google-harishreelakshmanakumar@gmail.com"
+  },
+  {
+    "id": "43d700cf-e389-425e-86d3-71b7ea11a8cd",
+    "name": "hari",
+    "email": "hari@gmail.com",
+    "phone": "6385810987",
+    "role": "USER",
+    "passwordHash": "f3be319c2e33f70a335314750099727331f66ead0bf4e6bde746ea9ae03acb3a"
   }
 ]

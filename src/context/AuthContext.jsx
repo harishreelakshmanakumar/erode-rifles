@@ -1,12 +1,10 @@
 "use client";
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { apiUrl } from "@/lib/apiUrl";
 
 const AuthContext = createContext();
 
-// Helper to build API URLs — Next.js API routes proxy to backend
-function apiUrl(path) {
-  return `/api/${path}`;
-}
+// Using shared apiUrl helper (respects NEXT_PUBLIC_API_BASE)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

@@ -3,11 +3,7 @@
 import { useState } from "react";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Loader2, CheckCircle } from "lucide-react";
 import { storeInfo } from "@/data/mockData";
-
-// Helper to build API URLs through the Caddy gateway
-function apiUrl(path) {
-  return `/api/${path}`;
-}
+import { apiUrl } from "@/lib/apiUrl";
 
 export default function Contact() {
   const [formData, setFormData] = useState({

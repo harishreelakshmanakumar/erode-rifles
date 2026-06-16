@@ -3,11 +3,7 @@
 import { useState, useEffect } from "react";
 import StatsCard from "@/components/admin/StatsCard";
 import { Package, ShoppingCart, MessageSquare, Users } from "lucide-react";
-
-// Helper to build API URLs through the Caddy gateway
-function apiUrl(path) {
-  return `/api/${path}`;
-}
+import { apiUrl } from "@/lib/apiUrl";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({

@@ -31,11 +31,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { handleImageError } from "@/lib/imageFallback";
-
-// Helper to build API URLs through the Caddy gateway
-function apiUrl(path) {
-  return `/api/${path}`;
-}
+import { apiUrl } from "@/lib/apiUrl";
 
 export default function ProductTable() {
   const [productList, setProductList] = useState(mockProducts);

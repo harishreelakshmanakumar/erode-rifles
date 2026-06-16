@@ -11,11 +11,7 @@ import PaymentStep from "@/components/checkout/PaymentStep";
 import { CheckCircle, ShoppingBag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
-
-// Helper to build API URLs through the Caddy gateway
-function apiUrl(path) {
-  return `/api/${path}`;
-}
+import { apiUrl } from "@/lib/apiUrl";
 
 export default function Checkout() {
   const { items, count, total, clearCart } = useCart();
